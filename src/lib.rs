@@ -71,7 +71,7 @@ impl<'a, 'b> Parser<'a> {
     }
     fn print_help(&self) {
         println!(
-            "{}\n\n\n{}",
+            "{}\n\n{}",
             self.usage.as_ref().unwrap(),
             self.help.as_ref().unwrap()
         );
