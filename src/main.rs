@@ -13,9 +13,9 @@ fn main() {
     let start_process = match argparse.get("--start-process") {
         ArgState::False => "wasn't called".to_string(),
         ArgState::True => panic!("Impossible!"),
-        ArgState::Value(s) => format!("is {}",s),
+        ArgState::Value(s) => format!("was called with '{}' as an argument",s),
     };
-    println!("--start-process {}", start_process);
+    println!("\n--start-process {}", start_process);
     let reload = match argparse.get("--reload") {
         ArgState::False => "wasn't called".to_string(),
         ArgState::True => "was called".to_string(),
