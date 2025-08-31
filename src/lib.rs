@@ -85,13 +85,22 @@ impl<'a, 'b> Parser<'a> {
             self.program_name,
         );
     }
+    fn val_missing(&self, arg: &str) {
+        println!(
+            "{}: option '{}' requires an argument\n{}\nTry '{} --help' for more information.",
+            self.program_name,
+            arg,
+            self.usage.as_ref().unwrap(),
+            self.program_name,
+        );
+    }
     pub fn run(&mut self) {
         let args = env::args();
         self.create_help();
         let mut next_is_val: Option<String> = None;
         self.parsed = Some(HashMap::new());
         let parsed = self.parsed.as_mut().unwrap();
-        'outer: for e_arg in args {
+        'outer: for e_arg in args.skip(1) {
             if next_is_val.is_some() {
                 parsed.insert(next_is_val.unwrap(), Some(e_arg));
                 next_is_val = None;
@@ -114,12 +123,12 @@ impl<'a, 'b> Parser<'a> {
                                     continue 'outer;
                                 } else {
                                     self.no_val_allowed(&arg_name);
-                                    process::exit(0);
+                                    process::exit(1);
                                 }
                             }
                         }
                         self.arg_does_not_exist(&arg_name);
-                        process::exit(0);
+                        process::exit(1);
                     }
                     None => {
                         for (p_arg, prop) in &self.args {
@@ -134,10 +143,55 @@ impl<'a, 'b> Parser<'a> {
                             }
                         }
                         self.arg_does_not_exist(&e_arg);
-                        process::exit(0);
+                        process::exit(1);
                     }
                 }
+            } else if e_arg.starts_with("-") {
+                let mut rest_is_val: Option<String> = None;
+                let mut value: Option<String> = None;
+                'chars: for char in e_arg.chars().skip(1) {
+                    if rest_is_val.is_some() {
+                        if value.is_none() {
+                            value = Some(char.to_string());
+                        } else {
+                            value.as_mut().unwrap().push(char);
+                        }
+                    } else {
+                        for (p_arg, prop) in &self.args {
+                            match prop.short_name {
+                                Some(sp_arg) => {
+                                    if format!("-{}", char) == sp_arg {
+                                        if prop.take_value.is_some() {
+                                            rest_is_val = Some(p_arg.to_string());
+                                            continue 'chars;
+                                        } else {
+                                            parsed.insert(p_arg.to_string(), None);
+                                            continue 'chars;
+                                        }
+                                    }
+                                }
+                                None => (),
+                            }
+                        }
+                        self.arg_does_not_exist(&format!("-{}", char));
+                        process::exit(1);
+                    }
+                }
+                if rest_is_val.is_some() {
+                    if value.is_none() {
+                        next_is_val = Some(rest_is_val.unwrap());
+                    } else {
+                        parsed.insert(rest_is_val.unwrap(), value);
+                    }
+                }
+            } else {
+                self.arg_does_not_exist(&e_arg);
+                process::exit(1);
             }
+        }
+        if next_is_val.is_some() {
+            self.val_missing(next_is_val.as_ref().unwrap());
+            process::exit(1);
         }
     }
     pub fn get(&mut self, long_name: &'a str) -> ArgState {
