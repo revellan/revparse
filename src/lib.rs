@@ -1,35 +1,39 @@
 use std::{collections::HashMap, env, process};
 const ERROR_1: &'static str = "The 'run' function has to be executed before this Function!!! Consult the Documentation for more... ERROR_CODE: '1'";
-const ERROR_2: &'static str = "Consult the Documentation for more... ERROR_CODE: '2'";
+//const ERROR_2: &'static str = "Consult the Documentation for more... ERROR_CODE: '2'";
 #[cfg(test)]
 mod tests;
 struct ArgProp<'a> {
     short_name: Option<&'a str>,
     help_msg: &'a str,
     take_value: Option<&'a str>,
-    required: bool,
+    //required: bool,
 }
-pub enum ArgState<'a> {
-    Value(&'a str),
+pub enum ArgState {
+    Value(String),
     True,
     False,
 }
 pub struct Parser<'a> {
     args: HashMap<&'a str, ArgProp<'a>>,
-    parsed: Option<HashMap<&'a str, Option<Option<&'a str>>>>,
+    parsed: Option<HashMap<String, Option<String>>>,
     program_name: &'a str,
     usage: Option<String>,
     help: Option<String>,
 }
 impl<'a, 'b> Parser<'a> {
     fn arg_does_not_exist(&self, arg: &str) {
-        println!(
-            "{}: unrecognized option '{}'\n{}\nTry '{} --help' for more information.",
-            self.program_name,
-            arg,
-            self.usage.as_ref().unwrap(),
-            self.program_name,
-        );
+        if arg == "--help" || arg == "-h" {
+            self.no_val_allowed(arg);
+        } else {
+            println!(
+                "{}: unrecognized option '{}'\n{}\nTry '{} --help' for more information.",
+                self.program_name,
+                arg,
+                self.usage.as_ref().unwrap(),
+                self.program_name,
+            );
+        }
     }
     fn create_help(&mut self) {
         self.help = Some(String::from("Options:\n"));
@@ -71,53 +75,84 @@ impl<'a, 'b> Parser<'a> {
             self.usage.as_ref().unwrap(),
             self.help.as_ref().unwrap()
         );
-        process::exit(0);
+    }
+    fn no_val_allowed(&self, arg: &str) {
+        println!(
+            "{}: option '{}' doesn't allow an argument\n{}\nTry '{} --help' for more information.",
+            self.program_name,
+            arg,
+            self.usage.as_ref().unwrap(),
+            self.program_name,
+        );
     }
     pub fn run(&mut self) {
-        let mut args = env::args();
+        let args = env::args();
         self.create_help();
-        let mut _next_is_val = false;
+        let mut next_is_val: Option<String> = None;
         self.parsed = Some(HashMap::new());
-        let parsed = self.parsed.unwrap();
-        for (arg, prop) in &self.args {
-            args.nth(0);
-            loop {
-                let env_arg = args.next();
-                match env_arg {
-                    None => break,
-                    Some(env_arg) => {
-                        if env_arg == "--help" || env_arg == "-h" {
-                            self.print_help();
-                        } else if env_arg.starts_with("--") {
-                            let splitted_arg = env_arg.split_once('=');
-                            match splitted_arg {
-                                Some((name,value)) => {
-                                    if name == *arg {
-                                        parsed.insert(name, Some())
-                                    }
+        let parsed = self.parsed.as_mut().unwrap();
+        'outer: for e_arg in args {
+            if next_is_val.is_some() {
+                parsed.insert(next_is_val.unwrap(), Some(e_arg));
+                next_is_val = None;
+                continue 'outer;
+            }
+            if e_arg == "--help" || e_arg == "-h" {
+                self.print_help();
+                process::exit(0);
+            }
+            if e_arg.starts_with("--") {
+                match e_arg
+                    .split_once('=')
+                    .map(|(arg_name, val)| (arg_name.to_string(), val.to_string()))
+                {
+                    Some((arg_name, val)) => {
+                        for (p_arg, prop) in &self.args {
+                            if arg_name == *p_arg {
+                                if prop.take_value.is_some() {
+                                    parsed.insert(arg_name, Some(val));
+                                    continue 'outer;
+                                } else {
+                                    self.no_val_allowed(&arg_name);
+                                    process::exit(0);
                                 }
-                                None => (),
                             }
-                        } else if env_arg.starts_with('-') {
                         }
+                        self.arg_does_not_exist(&arg_name);
+                        process::exit(0);
+                    }
+                    None => {
+                        for (p_arg, prop) in &self.args {
+                            if e_arg == *p_arg {
+                                if prop.take_value.is_some() {
+                                    next_is_val = Some(e_arg);
+                                    continue 'outer;
+                                } else {
+                                    parsed.insert(e_arg, None);
+                                    continue 'outer;
+                                }
+                            }
+                        }
+                        self.arg_does_not_exist(&e_arg);
+                        process::exit(0);
                     }
                 }
             }
         }
     }
-    pub fn get(&'b mut self, long_name: &'a str) -> ArgState<'b> {
+    pub fn get(&mut self, long_name: &'a str) -> ArgState {
         match self.parsed.as_mut().expect(ERROR_1).remove(long_name) {
-            None => panic!(
-                "The argument '{}' can't be requested, as it was never added!!! {}",
-                long_name, ERROR_2
-            ),
+            //None => panic!(
+            //"The argument '{}' can't be requested, as it was never added!!! {}",
+            //long_name, ERROR_2
+            //),
+            //Some(v) => match v {
+            None => ArgState::False,
             Some(v) => match v {
-                None => ArgState::False,
-                Some(v) => match v {
-                    None => ArgState::True,
-                    Some(v) => ArgState::Value(v),
-                },
+                None => ArgState::True,
+                Some(v) => ArgState::Value(v),
             },
+            //},
         }
     }
     pub fn new(program_name: &'a str) -> Parser<'a> {
@@ -135,7 +170,7 @@ impl<'a, 'b> Parser<'a> {
         short_name: Option<&'a str>,
         help_msg: &'a str,
         take_value: Option<&'a str>,
-        required: bool,
+        //required: bool,
     ) {
         self.args.insert(
             long_name,
@@ -143,7 +178,7 @@ impl<'a, 'b> Parser<'a> {
                 short_name,
                 help_msg,
                 take_value,
-                required,
+                //required,
             },
         );
     }

@@ -1,20 +1,19 @@
 use argparse::{ArgState, Parser};
 fn main() {
-    let mut argparse = Parser::new("Program_name");
+    let mut argparse = Parser::new("argparse");
     argparse.add_argument(
         "--start-process",
         Some("-s"),
         "Start some Process, this is the help message!",
         Some("process"),
-        true,
     );
-    argparse.add_argument("--reload", Some("-r"), "Reload the page", None, false);
-    argparse.add_argument("--load", Some("-l"), "Load the page", None, false);
+    argparse.add_argument("--reload", Some("-r"), "Reload the page", None);
+    argparse.add_argument("--load", Some("-l"), "Load the page", None);
     argparse.run();
-    let load: bool = match argparse.get("--load") {
-        ArgState::False => false,
-        ArgState::True => true,
-        ArgState::Value(_) => panic!("Impossible"),
+    let start_process = match argparse.get("--start-process") {
+        ArgState::False => "Arg wasn't called".to_string(),
+        ArgState::True => "Arg was called".to_string(),
+        ArgState::Value(s) => s,
     };
-    println!("{load}");
+    println!("{}", start_process)
 }
