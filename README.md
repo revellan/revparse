@@ -81,7 +81,7 @@ You can best handle ArgState with a match expression like this:
 let mut parser = Parser::new("your_program_name");
 parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
 parser.run();
-let result: ArgState = parser.get("--start-process"); // if there is a typo in --start-process, the program will panic at runtime
+let result: ArgState = parser.get("--start-process");
 match result {
     ArgState::True => panic!("Impossible"), // True will only be the case, if you didn't allow a value
     ArgState::False => println!("Argument '--start-process' was not called"),
