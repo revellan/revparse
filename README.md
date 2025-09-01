@@ -100,7 +100,7 @@ fn main() {
         "Start some Process, this is the help message!", // help message
         Some("process"), // takes a value, in the help message this will be shown as --start-process=PROCESS
     );
-    parser.add_argument("--reload", Some("-r"), "Reload the page", None);
+    parser.add_argument("--reload", Some("-r"), "Reload the page", None); // no value is taken by this argument,
     parser.add_argument("--load", Some("-l"), "Load the page", None);
     parser.run();
     let start_process = match parser.get("--start-process") {
@@ -112,7 +112,7 @@ fn main() {
     let reload = match parser.get("--reload") {
         ArgState::False => "wasn't called".to_string(),
         ArgState::True => "was called".to_string(),
-        ArgState::Value(_) => panic!("Impossible!"),
+        ArgState::Value(_) => panic!("Impossible!"), // which is why this outcome here is impossible
     };
     println!("--reload {}", reload);
     let load = match parser.get("--load") {
