@@ -1,12 +1,12 @@
-# argparse
-## Rust Version of the python argparse library
+# revparse
+## Rust Version of the python revparse library
 
 
 ## Installation:
 ```sh
 #Clone the git repo
-sudo git clone https://github.com/revellan/argparse /opt/argparse
-cd /opt/argparse
+sudo git clone https://github.com/revellan/revparse /opt/revparse
+cd /opt/revparse
 
 #install to /usr/local/bin
 sudo make install
@@ -14,7 +14,7 @@ sudo make install
 
 ## Uninstall:
 ```sh
-sudo rm /usr/local/bin/argparse
+sudo rm /usr/local/bin/revparse
 ```
 
 # Usage
@@ -91,7 +91,7 @@ match result {
 
 Here's an example Program:
 ```rust
-use argparse::{ArgState, Parser};
+use revparse::{ArgState, Parser};
 fn main() {
     let mut parser = Parser::new("parser");
     parser.add_argument(

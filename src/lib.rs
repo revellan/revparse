@@ -28,7 +28,7 @@ pub struct Parser<'a> {
     help: Option<String>,
 }
 impl<'a, 'b> Parser<'a> {
-    //! The Parser struct is the Heart of argparse.
+    //! The Parser struct is the Heart of revparse.
     //! Here is a brief explanation.
     //! # Usage
     //! First you have to create an instance of the Parser struct and provide the name of your Program, that will later be used for those cases:
@@ -39,7 +39,7 @@ impl<'a, 'b> Parser<'a> {
     //! ```
     //! You can create an instance of Parser by calling the associated new() function with your programs name as an argument and assigning the returned Parser instance to a mutable variable (it has to be mutable!):
     //! ```rust
-    //! use argparse::Parser;
+    //! use revparse::Parser;
     //! let mut parser = Parser::new("your_program_name");
     //! ```
     //! To add arguments, you can use the .add_argument() function on parser.
@@ -61,7 +61,7 @@ impl<'a, 'b> Parser<'a> {
     //! If you want this to be possible, you have to provide a name for the value to be shown in the help message wrapped in a Some().
     //! For example to add an argument "--start-process" that takes a value "PROCESS" you have to write the following:
     //! ```rust
-    //! use argparse::Parser;
+    //! use revparse::Parser;
     //! let mut parser = Parser::new("your_program_name");
     //! parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
     //! ```
@@ -76,7 +76,7 @@ impl<'a, 'b> Parser<'a> {
     //!
     //! To get the value of the arguments, you can use the .get() function defined on Parser. But before you can do that, you'll have to call .run():
     //! ```rust
-    //! use argparse::Parser;
+    //! use revparse::Parser;
     //! let mut parser = Parser::new("your_program_name");
     //! parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
     //! parser.run();
@@ -94,7 +94,7 @@ impl<'a, 'b> Parser<'a> {
     //!
     //! You can best handle ArgState with a match expression like this:
     //! ```rust
-    //! use argparse::{ArgState, Parser};
+    //! use revparse::{ArgState, Parser};
     //! let mut parser = Parser::new("your_program_name");
     //! parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
     //! parser.run();
@@ -107,7 +107,7 @@ impl<'a, 'b> Parser<'a> {
     //! ```
     //! Here's an example Program, that takes 3 arguments, one of which can take a value:
     //! ```rust
-    //! use argparse::{ArgState, Parser};
+    //! use revparse::{ArgState, Parser};
     //! let mut parser = Parser::new("parser");
     //! parser.add_argument(
     //!     "--start-process",                               // long name
@@ -316,7 +316,7 @@ impl<'a, 'b> Parser<'a> {
     /// Function to get the results of the arguments. Returns an instance of ArgState.
     /// Example code:
     /// ```rust
-    /// use argparse::{ArgState, Parser};
+    /// use revparse::{ArgState, Parser};
     /// let mut parser = Parser::new("your_program_name");
     /// parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
     /// parser.run();
@@ -339,7 +339,7 @@ impl<'a, 'b> Parser<'a> {
     /// Function to create an instance of Parser, on which you call the .add_argument() function, as well as .get() and .run()
     /// Example code:
     /// ```rust
-    /// use argparse::Parser;
+    /// use revparse::Parser;
     /// let mut parser = Parser::new("your_program_name");
     /// ```
     pub fn new(program_name: &'a str) -> Parser<'a> {
@@ -366,7 +366,7 @@ impl<'a, 'b> Parser<'a> {
     /// If you want this to be possible, you have to provide a name for the value to be shown in the help message wrapped in a Some().
     /// For example to add an argument "--start-process" that takes a value "PROCESS" you have to write the following:
     /// ```rust
-    /// use argparse::Parser;
+    /// use revparse::Parser;
     /// let mut parser = Parser::new("your_program_name");
     /// parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
     /// ```

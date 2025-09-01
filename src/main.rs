@@ -1,4 +1,4 @@
-use argparse::{ArgState, Parser};
+use revparse::{ArgState, Parser};
 fn main() {
     let mut parser = Parser::new("parser");
     parser.add_argument(
