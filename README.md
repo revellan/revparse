@@ -1,23 +1,5 @@
 # revparse
-## Rust Version of the python revparse library
-
-
-## Installation:
-```sh
-#Clone the git repo
-sudo git clone https://github.com/revellan/revparse /opt/revparse
-cd /opt/revparse
-
-#install to /usr/local/bin
-sudo make install
-```
-
-## Uninstall:
-```sh
-sudo rm /usr/local/bin/revparse
-```
-
-# Usage
+## Usage
 First you have to create an instance of the Parser struct and provide the name of your Program, that will later be used for those cases:
 ```
 your_program_name: unrecognized option '-a'
