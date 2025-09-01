@@ -2,5 +2,10 @@
 name = "revparse"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["argument-parser", "gnu", "flags", "options", "subcommands"]
+description = "GNU Argument Parser, that's easy to use."
+
 
 [dependencies]
