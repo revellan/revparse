@@ -9,6 +9,8 @@ fn main() {
     );
     parser.add_argument("--reload", Some("-r"), "Reload the page", None);
     parser.add_argument("--load", Some("-l"), "Load the page", None);
+    parser.add_pos_arg("DIRECTORY");
+    parser.add_pos_arg("[FILE]...");
     parser.run();
     let start_process = match parser.get("--start-process") {
         ArgState::False => "wasn't called".to_string(),
@@ -28,4 +30,14 @@ fn main() {
         ArgState::Value(_) => panic!("Impossible!"),
     };
     println!("--load {}", load);
+    match parser.pos_args {
+        Some(vec) => {
+            let mut c = 0;
+            for i in vec {
+                c += 1;
+                println!("Positional arg {}: '{}'", c, i);
+            }
+        }
+        None => println!("No positional arguments given."),
+    }
 }

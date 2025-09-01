@@ -84,3 +84,21 @@ fn take_value_not_given_short_name_2() {
     let mut parser = base();
     parser.run_priv(args(&["n", "-nt"]));
 }
+#[test]
+fn positional_arguments() {
+    let mut parser = Parser::new("test");
+    parser.add_pos_arg("TEST");
+    parser.add_pos_arg("TEST2");
+    parser.add_argument("--aletter", Some("-a"), "help msg", None);
+    parser.add_argument("--bletter", Some("-b"), "help msg", None);
+    parser.add_argument("--cletter", Some("-c"), "help msg", None);
+    parser.run_priv(args(&["n", "PARG1", "-abc", "PARG2"]));
+    match parser.pos_args {
+        Some(vec) => {
+            assert_eq!(vec.len(), 2);
+            assert_eq!(vec[0], "PARG1");
+            assert_eq!(vec[1], "PARG2");
+        },
+        None => panic!("Positional arguments were not parsed correctly!!!") 
+    }
+}

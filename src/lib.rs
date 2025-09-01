@@ -26,6 +26,26 @@ pub struct Parser<'a> {
     program_name: &'a str,
     usage: Option<String>,
     help: Option<String>,
+    pres_pos_args: Option<Vec<&'a str>>,
+    max_pos_args_left: u16,
+    pos_arg_help: Option<&'a str>,
+    /// Contains Option<Vec<String>>
+    /// ```rust
+    /// use revparse::Parser;
+    /// let mut parser = Parser::new("your_program_name");
+    /// parser.add_pos_arg("ARG");
+    /// parser.run();
+    /// match parser.pos_args {
+    ///     Some(vec) => {
+    ///         assert_eq!(vec.len(), 1); // The length can't be higher than the amount of positional arguments added by you.
+    ///         println!("Arg was: {}", vec[0]);
+    ///     }
+    ///     None => {
+    ///         println!("No positional argument was given");
+    ///     }
+    /// }
+    /// ```
+    pub pos_args: Option<Vec<String>>,
 }
 impl<'a, 'b> Parser<'a> {
     //! The Parser struct is the Heart of revparse.
@@ -105,6 +125,32 @@ impl<'a, 'b> Parser<'a> {
     //!     ArgState::Value(value) => println!("Argument '--start-process' was called with the value: '{value}'"),
     //! }
     //! ```
+    //! The .add_pos_arg() function can be used to add Positional Arguments (Arguments, that are passed without a flag, for example PATTERN in `grep <PATTERN>`)
+    //! Usage:
+    //! ```rust
+    //! use revparse::Parser;
+    //! let mut parser = Parser::new("your_program_name");
+    //! parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
+    //! parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
+    //! ```
+
+    //! Parsed Positional Arguments can seen in the only public Structure field of Parser: pos_args
+
+    //! The type of pos_args is Option<Vec<String>>.
+    //! If there were no positional arguments given by the user, it will be None.
+    //! All positional arguments given by the user, as far as allowed, will be pushed onto the Vector as a String.
+
+    //! Usage:
+    //! ```rust
+    //! use revparse::Parser;
+    //! let mut parser = Parser::new("your_program_name");
+    //! parser.add_pos_arg("DIRECTORY");
+    //! parser.run();
+    //! match parser.pos_args {
+    //!     None => println!("The user didn't enter any positional arguments."),
+    //!     Some(vec) => println!("The user entered following positional arguments: {:?}", vec),
+    //! }
+    //! ```
     //! Here's an example Program, that takes 3 arguments, one of which can take a value:
     //! ```rust
     //! use revparse::{ArgState, Parser};
@@ -151,11 +197,26 @@ impl<'a, 'b> Parser<'a> {
         }
     }
     fn create_help(&mut self) {
-        self.help = Some(String::from("Options:\n"));
+        if self.pos_arg_help.is_some() {
+            self.help = Some(format!(
+                "{}\n\nOptions:\n",
+                self.pos_arg_help.unwrap().to_owned()
+            ));
+        } else {
+            self.help = Some(String::from("\n\nOptions:\n"));
+        }
         self.usage = Some(String::from(format!(
             "Usage: {} [OPTION]...",
             self.program_name
         )));
+        if self.pres_pos_args.is_some() {
+            for i in self.pres_pos_args.as_ref().unwrap() {
+                self.usage
+                    .as_mut()
+                    .unwrap()
+                    .push_str(&format!(" {}", i.to_uppercase()))
+            }
+        }
         for (i, s) in &self.args {
             let mut length: i8; //28 chars between help_msg and the beginning of the line
             let help = self.help.as_mut().unwrap();
@@ -186,7 +247,7 @@ impl<'a, 'b> Parser<'a> {
     }
     fn print_help(&self) {
         println!(
-            "{}\n\n{}",
+            "{}{}",
             self.usage.as_ref().unwrap(),
             self.help.as_ref().unwrap()
         );
@@ -304,8 +365,21 @@ impl<'a, 'b> Parser<'a> {
                     }
                 }
             } else {
-                self.arg_does_not_exist(&e_arg);
-                exit(1);
+                // pos_args:
+                if self.pres_pos_args.is_some() {
+                    if self.max_pos_args_left <= 0 {
+                        self.arg_does_not_exist(&e_arg);
+                        exit(1);
+                    }
+                    if self.pos_args.is_none() {
+                        self.pos_args = Some(Vec::new());
+                    }
+                    self.pos_args.as_mut().unwrap().push(e_arg);
+                    self.max_pos_args_left -= 1;
+                } else {
+                    self.arg_does_not_exist(&e_arg);
+                    exit(1);
+                }
             }
         }
         if next_is_val.is_some() {
@@ -349,7 +423,14 @@ impl<'a, 'b> Parser<'a> {
             program_name,
             usage: None,
             help: None,
+            pres_pos_args: None,
+            max_pos_args_left: 0,
+            pos_arg_help: None,
+            pos_args: None,
         }
+    }
+    pub fn pos_arg_help(&mut self, help_msg: &'a str) {
+        self.pos_arg_help = Some(help_msg);
     }
     /// To add arguments, you can use the .add_argument() function on a Parser instance.
     /// The function takes 4 Parameters apart from self.
@@ -394,5 +475,20 @@ impl<'a, 'b> Parser<'a> {
                 take_value,
             },
         ));
+    }
+    /// Function for adding Positional Arguments (Arguments, that are passed without a flag, for example PATTERN in grep <PATTERN>)
+    /// Usage:
+    /// ```rust
+    /// use revparse::Parser;
+    /// let mut parser = Parser::new("your_program_name");
+    /// parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
+    /// parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
+    /// ```
+    pub fn add_pos_arg(&mut self, name: &'a str) {
+        self.max_pos_args_left += 1;
+        if self.pres_pos_args.is_none() {
+            self.pres_pos_args = Some(Vec::new());
+        }
+        self.pres_pos_args.as_mut().unwrap().push(name);
     }
 }

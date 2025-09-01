@@ -70,6 +70,32 @@ match result {
     ArgState::Value(value) => println!("Argument '--start-process' was called with the value: '{value}'"),
 }
 ```
+The .add_pos_arg() function can be used to add Positional Arguments (Arguments, that are passed without a flag, for example PATTERN in `grep <PATTERN>`)
+Usage:
+```rust
+use revparse::Parser;
+let mut parser = Parser::new("your_program_name");
+parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
+parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
+```
+
+Parsed Positional Arguments can seen in the only public Structure field of Parser: pos_args
+
+The type of pos_args is Option<Vec<String>>.
+If there were no positional arguments given by the user, it will be None.
+All positional arguments given by the user, as far as allowed, will be pushed onto the Vector as a String.
+
+Usage:
+```rust
+use revparse::Parser;
+let mut parser = Parser::new("your_program_name");
+parser.add_pos_arg("DIRECTORY");
+parser.run();
+match parser.pos_args {
+    None => println!("The user didn't enter any positional arguments.");
+    Some(vec) => println!("The user entered following positional arguments: {:?}", vec)
+}
+```
 
 Here's an example Program:
 ```rust
