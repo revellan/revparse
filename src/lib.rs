@@ -21,7 +21,7 @@ pub enum ArgState {
     False,
 }
 pub struct Parser<'a> {
-    args: HashMap<&'a str, ArgProp<'a>>,
+    args: Vec<(&'a str, ArgProp<'a>)>,
     parsed: Option<HashMap<String, Option<String>>>,
     program_name: &'a str,
     usage: Option<String>,
@@ -156,7 +156,7 @@ impl<'a, 'b> Parser<'a> {
             "Usage: {} [OPTION]...",
             self.program_name
         )));
-        for (i, s) in self.args.iter() {
+        for (i, s) in &self.args {
             let mut length: i8; //28 chars between help_msg and the beginning of the line
             let help = self.help.as_mut().unwrap();
             match s.short_name {
@@ -344,7 +344,7 @@ impl<'a, 'b> Parser<'a> {
     /// ```
     pub fn new(program_name: &'a str) -> Parser<'a> {
         Parser {
-            args: HashMap::new(),
+            args: Vec::new(),
             parsed: None,
             program_name,
             usage: None,
@@ -386,13 +386,13 @@ impl<'a, 'b> Parser<'a> {
         help_msg: &'a str,
         take_value: Option<&'a str>,
     ) {
-        self.args.insert(
+        self.args.push((
             long_name,
             ArgProp {
                 short_name,
                 help_msg,
                 take_value,
             },
-        );
+        ));
     }
 }
