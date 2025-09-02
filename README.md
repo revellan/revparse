@@ -1,131 +1,122 @@
 # revparse
 ## Usage
-First you have to create an instance of the Parser struct and provide the name of your Program, that will later be used for those cases:
-```
-your_program_name: unrecognized option '-a'
-Usage: your_program_name [OPTION]...
-Try 'your_program_name --help' for more information.
-```
-You can create an instance of Parser by calling the associated new() function with your programs name as an argument and assigning the returned Parser instance to a mutable variable (it has to be mutable!):
 ```rust
-let mut parser = Parser::new("your_program_name");
+// Import the Parser struct, and ArgState enum
+use revparse::{ArgState, Parser};
+// Create an instance of Parser
+let mut parser: Parser = Parser::new("your_program_name"); // your_program_name is needed for the help message
+// Add argument
+parser.add_argument(
+    "--argument",                  // Long Name, not optional
+    Some("-a"),                    // Optional short name
+    "Argument does this and that", // Help message for that specific argument
+    // If this is Some(), then the argument will require a value to be passed to it
+    Some("VALUE"),                 // like this: your_program_name -a "value"
+);
+
+// Call this function between adding the arguments and getting them
+parser.run(); // Will take the arguments passed to the program
+// Alternatively you can use run_custom_args() for testing
+// parser.run_custom_args(Parser::args(&["your_program_name", "-a", "value"]));
+
+let argument: ArgState = parser.get("--argument");
+match argument {
+    ArgState::False => println!("--argument wasn't called"),
+    ArgState::Value(val) => println!("--argument was called with the value: {}", val),
+    ArgState::True => panic!("Impossible, ArgState::True will only be returned, if the last argument to parser.add_argument() is None."),
+}
 ```
-To add arguments, you can use the .add_argument() function on parser.
-The function takes 4 Parameters apart from self.
-
-The First is the long name, that has to start with "--" and is required, not optional.
-
-The Second is an optional short name, of type Option<&str>. If it is set to None, there will be no short name for that argument, if you want a short name, like "-e" you will have to wrap it in Some() like this Some("-e"). Short names have to start with a '-' and only contain one other character.
-
-The Third option is the help message, that will be shown behind the corresponding option, when --help is called.
-
-The Fourth options is about wheter the argument can take values, or arguments like this:
-```
-your_program_name --option-that-takes-a-value="This is the value"
-your_program_name --option-that-takes-a-value "This is the value"
-your_program_name -o"This is the value"
-your_program_name -o "This is the value"
-```
-If you want this to be possible, you have to provide a name for the value to be shown in the help message wrapped in a Some().
-For example to add an argument "--start-process" that takes a value "PROCESS" you have to write the following:
+# Positional Arguments
+Positional Arguments are Values passed without flags.
+## Usage
 ```rust
-let mut parser = Parser::new("your_program_name");
-parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
+use revparse::Parser;
+let mut parser: Parser = Parser::new("grep");
+// This would store the first argument, that doesn't start with '-' AND isn't after a flag, that takes a value.
+parser.add_pos_arg("PATTERN");
+parser.run();
+let pos_args: Vec<String> = parser.get_pos_args();
+if pos_args.len() != 0 {
+    // So in this case 'grep smth' would give you the String "smth" in pos_args[0]. The string can't start with '-'.
+    // If you want your users to pass values with '-', use a flag.
+    println!("The first positional argument was: {}", pos_args[0]);
+}
 ```
-You don't have to provide "PROCESS" in capital letters, since they will be capitalized automatically. This is what "PROCESS" is needed for:
+# Examples
+### Example Program with flag '-a', that takes a value and flag '-b', that doesn't
+```rust
+use revparse::{ArgState, Parser};
+let mut parser: Parser = Parser::new("your_program_name");
+parser.add_argument("--arg-a", Some("-a"), "Takes a value", Some("VAL_NAME"));
+parser.add_argument("--arg-b", Some("-b"), "Does not take a value", None);
+// Normally you would call .run(), but in this example we will call .run_custom_args() instead, to test it.
+parser.run_custom_args(Parser::args(&[
+    "your_program_name", // Program name will be ignored
+    "-avalue",           // "-a" "value" is valid too
+    "-b",
+]));
+let value_passed_to_a: String = match parser.get("--arg-a") {
+    ArgState::Value(s) => s,
+    _ => panic!("Parsing Error!"),
+};
+assert_eq!(value_passed_to_a, "value");
+if let ArgState::True = parser.get("--arg-b") {
+    // true, as arg was called
+} else {
+    panic!("Parsing Error!")
+}
 ```
+#### Help Message:
+```txt
 Usage: your_program_name [OPTION]...
 
 Options:
-  -s, --start-process=PROCESS  Start some process, this is the help message
-  ^-1 ^-2.parameter   ^-4.p.   ^-3.parameter
+  -a, --arg-a=VAL_NAME      Takes a value
+  -b, --arg-b               Does not take a value
 ```
-
-To get the value of the arguments, you can use the .get() function defined on Parser. But before you can do that, you'll have to call .run():
-```rust
-let mut parser = Parser::new("your_program_name");
-parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
-parser.run();
-```
-
-Then you can call the .get() function on parser and provide the long name of your argument as a function parameter, which will return an enum called ArgState with three possible variants:
-
-True
-False
-Value(String)
-
-True will be returned, if the argument doesn't require a value to be inserted into it, as with --start-process="Value" and was called.
-False will be returned, if the argument wasn't called, no matter wheter a value is needed or not.
-Value(String) will be returned, if the argument needs a value, and was called with one. You are given ownership of the returned String.
-
-You can best handle ArgState with a match expression like this:
-```rust
-let mut parser = Parser::new("your_program_name");
-parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
-parser.run();
-let result: ArgState = parser.get("--start-process");
-match result {
-    ArgState::True => panic!("Impossible"), // True will only be the case, if you didn't allow a value
-    ArgState::False => println!("Argument '--start-process' was not called"),
-    ArgState::Value(value) => println!("Argument '--start-process' was called with the value: '{value}'"),
-}
-```
-The .add_pos_arg() function can be used to add Positional Arguments (Arguments, that are passed without a flag, for example PATTERN in `grep <PATTERN>`)
-Usage:
-```rust
-use revparse::Parser;
-let mut parser = Parser::new("your_program_name");
-parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
-parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
-```
-
-## Get Value of Positional Arguments 
-The function .get_pos_args() returns a Vector with all Positional arguments: `<Vec<String>`
-Usage:
-```rust
-use revparse::Parser;
-let mut parser = Parser::new("your_program_name");
-parser.add_pos_arg("ARG");
-parser.run();
-let pos_args: Vec<String> = parser.get_pos_args();
-match pos_args.len() {
-    0 => println!("No positional argument was given"),
-    1 => println!("Arg was: {}", pos_args[0]),
-    _ => panic!("The Vectors length can't exceed the amount of times the add_pos_arg() function was called."),
-}
-```
-
-Here's an example Program:
+### Previous Example Program with 2 Positional Arguments
 ```rust
 use revparse::{ArgState, Parser};
-fn main() {
-    let mut parser = Parser::new("parser");
-    parser.add_argument(
-        "--start-process",                               // long name
-        Some("-s"),                                      // short name (optional)
-        "Start some Process, this is the help message!", // help message
-        Some("process"), // takes a value, in the help message this will be shown as --start-process=PROCESS
-    );
-    parser.add_argument("--reload", Some("-r"), "Reload the page", None); // no value is taken by this argument,
-    parser.add_argument("--load", Some("-l"), "Load the page", None);
-    parser.run();
-    let start_process = match parser.get("--start-process") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => panic!("Impossible!"),
-        ArgState::Value(s) => format!("was called with '{}' as an argument", s),
-    };
-    println!("\n--start-process {}", start_process);
-    let reload = match parser.get("--reload") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => "was called".to_string(),
-        ArgState::Value(_) => panic!("Impossible!"), // which is why this outcome here is impossible
-    };
-    println!("--reload {}", reload);
-    let load = match parser.get("--load") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => "was called".to_string(),
-        ArgState::Value(_) => panic!("Impossible!"),
-    };
-    println!("--load {}", load);
+let mut parser: Parser = Parser::new("your_program_name");
+parser.add_argument("--arg-a", Some("-a"), "Takes a value", Some("VAL_NAME"));
+parser.add_argument("--arg-b", Some("-b"), "Does not take a value", None);
+parser.add_pos_arg("EXAMPLE");
+parser.add_pos_arg("[ANOTHER]...");
+// You can see the help message format below
+parser.pos_arg_help("Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc\nCan contain new line chars.");
+// Normally you would call .run(), but in this example we will call .run_custom_args() instead, to test it.
+parser.run_custom_args(Parser::args(&[
+    "your_program_name", // Program name will be ignored
+    "--arg-a=value",     // "-a" "value" is valid too
+    "pos_arg1",           // Valid, because it doesn't start with a '-'
+    "-b",
+    "This is a positional Argument, because -b does not take a value",
+]));
+// From previos code
+let value_passed_to_a: String = match parser.get("--arg-a") {
+    ArgState::Value(s) => s,
+    _ => panic!("Parsing Error!"),
+};
+assert_eq!(value_passed_to_a, "value");
+if let ArgState::True = parser.get("--arg-b") {
+    // true, as arg was called
+} else {
+    panic!("Parsing Error!")
 }
+
+// Positional Arguments
+let pos_args: Vec<String> = parser.get_pos_args();
+assert_eq!(pos_args.len(), 2); // Length is 2, as two positional Arguments were provided.
+assert_eq!(pos_args[0], "pos_arg1");
+assert_eq!(pos_args[1], "This is a positional Argument, because -b does not take a value");
+```
+#### Help Message:
+```txt
+Usage: your_program_name [OPTION]... EXAMPLE [ANOTHER]...
+Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc
+Can contain new line chars.
+
+Options:
+  -a, --arg-a=VAL_NAME      Takes a value
+  -b, --arg-b               Does not take a value
 ```
