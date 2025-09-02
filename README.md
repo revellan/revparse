@@ -79,22 +79,19 @@ parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, 
 parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
 ```
 
-Parsed Positional Arguments can seen in the only public Structure field of Parser: pos_args
-
-The type of pos_args is `Option<Vec<String>>`.
-If there were no positional arguments given by the user, it will be None.
-All positional arguments given by the user, as far as allowed, will be pushed onto the Vector as a String.
-
+## Get Value of Positional Arguments 
+The function .get_pos_args() returns a Vector with all Positional arguments: `<Vec<String>`
 Usage:
 ```rust
 use revparse::Parser;
 let mut parser = Parser::new("your_program_name");
-parser.add_pos_arg("DIRECTORY");
+parser.add_pos_arg("ARG");
 parser.run();
-if parser.pos_args.len() != 0 {
-    println!("The user entered following positional arguments: {:?}", vec);
-} else {
-    pritnln!("The user did not enter any positional arguments.");
+let pos_args: Vec<String> = parser.get_pos_args();
+match pos_args.len() {
+    0 => println!("No positional argument was given"),
+    1 => println!("Arg was: {}", pos_args[0]),
+    _ => panic!("The Vectors length can't exceed the amount of times the add_pos_arg() function was called."),
 }
 ```
 
