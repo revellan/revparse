@@ -49,12 +49,12 @@ impl<'a, 'b> Parser<'a> {
     //!     // If this is Some(), then the argument will require a value to be passed to it
     //!     Some("VALUE"),                 // like this: your_program_name -a "value"
     //! );
-    //! 
+    //!
     //! // Call this function between adding the arguments and getting them
     //! parser.run(); // Will take the arguments passed to the program
     //! // Alternatively you can use run_custom_args() for testing
     //! // parser.run_custom_args(Parser::args(&["your_program_name", "-a", "value"]));
-    //! 
+    //!
     //! let argument: ArgState = parser.get("--argument");
     //! match argument {
     //!     ArgState::False => println!("--argument wasn't called"),
@@ -105,7 +105,7 @@ impl<'a, 'b> Parser<'a> {
     //! #### Help Message:
     //! ```txt
     //! Usage: your_program_name [OPTION]...
-    //! 
+    //!
     //! Options:
     //!   -a, --arg-a=VAL_NAME      Takes a value
     //!   -b, --arg-b               Does not take a value
@@ -139,7 +139,7 @@ impl<'a, 'b> Parser<'a> {
     //! } else {
     //!     panic!("Parsing Error!")
     //! }
-    //! 
+    //!
     //! // Positional Arguments
     //! let pos_args: Vec<String> = parser.get_pos_args();
     //! assert_eq!(pos_args.len(), 2); // Length is 2, as two positional Arguments were provided.
@@ -151,12 +151,12 @@ impl<'a, 'b> Parser<'a> {
     //! Usage: your_program_name [OPTION]... EXAMPLE [ANOTHER]...
     //! Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc
     //! Can contain new line chars.
-    //! 
+    //!
     //! Options:
     //!   -a, --arg-a=VAL_NAME      Takes a value
     //!   -b, --arg-b               Does not take a value
     //! ```
-    //! 
+    //!
     fn arg_does_not_exist(&self, arg: &str) {
         if arg == "--help" || arg == "-h" {
             self.no_val_allowed(arg);
@@ -191,9 +191,10 @@ impl<'a, 'b> Parser<'a> {
                     .push_str(&format!(" {}", i.to_uppercase()))
             }
         }
+        let help = self.help.as_mut().unwrap();
+        help.push_str("  -h, --help                display this help text and exit\n");
         for (i, s) in &self.args {
             let mut length: i8; //28 chars between help_msg and the beginning of the line
-            let help = self.help.as_mut().unwrap();
             match s.short_name {
                 Some(sn) => {
                     help.push_str(format!("  {}, {}", sn, i).as_str());
@@ -256,7 +257,8 @@ impl<'a, 'b> Parser<'a> {
         self.parsed = Some(HashMap::new());
         let parsed = self.parsed.as_mut().unwrap();
         'outer: for e_arg in args.skip(1) {
-            if next_is_val.is_some() { parsed.insert(next_is_val.unwrap(), Some(e_arg));
+            if next_is_val.is_some() {
+                parsed.insert(next_is_val.unwrap(), Some(e_arg));
                 next_is_val = None;
                 continue 'outer;
             }
