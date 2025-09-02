@@ -1,7 +1,7 @@
-use std::{collections::HashMap, env};
-const ERROR_1: &'static str = "The 'run' function has to be executed before this Function!!! Consult the Documentation for more... ERROR_CODE: '1'";
+use std::{collections::HashMap, env, mem};
 #[cfg(test)]
 mod tests;
+const ERROR_1: &'static str = "The 'run' function has to be executed before this Function!!! Consult the Documentation for more... ERROR_CODE: '1'";
 #[cfg(test)]
 fn exit(code: i32) -> ! {
     panic!("Exit code: '{}'", code);
@@ -29,23 +29,7 @@ pub struct Parser<'a> {
     pres_pos_args: Option<Vec<&'a str>>,
     max_pos_args_left: u16,
     pos_arg_help: Option<&'a str>,
-    /// Contains Option<Vec<String>>
-    /// ```rust
-    /// use revparse::Parser;
-    /// let mut parser = Parser::new("your_program_name");
-    /// parser.add_pos_arg("ARG");
-    /// parser.run();
-    /// match parser.pos_args {
-    ///     Some(vec) => {
-    ///         assert_eq!(vec.len(), 1); // The length can't be higher than the amount of positional arguments added by you.
-    ///         println!("Arg was: {}", vec[0]);
-    ///     }
-    ///     None => {
-    ///         println!("No positional argument was given");
-    ///     }
-    /// }
-    /// ```
-    pub pos_args: Option<Vec<String>>,
+    parsed_pos_args: Option<Vec<String>>,
 }
 impl<'a, 'b> Parser<'a> {
     //! The Parser struct is the Heart of revparse.
@@ -133,23 +117,37 @@ impl<'a, 'b> Parser<'a> {
     //! parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
     //! parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
     //! ```
-
-    //! Parsed Positional Arguments can seen in the only public Structure field of Parser: pos_args
-
-    //! The type of pos_args is Option<Vec<String>>.
+    //!
+    //! Parsed Positional Arguments can be requested using the `.get_pos_arg()` function
+    //! The type of pos_args is `Option<Vec<String>>`.
     //! If there were no positional arguments given by the user, it will be None.
     //! All positional arguments given by the user, as far as allowed, will be pushed onto the Vector as a String.
-
+    //!
     //! Usage:
     //! ```rust
-    //! use revparse::Parser;
+    //! use revparse::{Parser, ArgState};
     //! let mut parser = Parser::new("your_program_name");
-    //! parser.add_pos_arg("DIRECTORY");
     //! parser.run();
-    //! match parser.pos_args {
-    //!     None => println!("The user didn't enter any positional arguments."),
-    //!     Some(vec) => println!("The user entered following positional arguments: {:?}", vec),
-    //! }
+    //! parser.add_pos_arg("DIRECTORY");
+    //! let pos_args: Vec<String> = parser.get_pos_args();
+    //! match pos_args.len() {
+    //!     0 => println!("No positional argument was given"),
+    //!     1 => println!("Arg was: {}", pos_args[0]),
+    //!     _ => panic!("The Vectors length can't exceed the amount of times the add_pos_arg() function was called."),
+    //! };
+    //! let mut parser = Parser::new("test");
+    //! parser.add_pos_arg("ARG1");
+    //! parser.add_pos_arg("ARG2");
+    //! parser.add_argument("--some-flag-that-takes-a-value", None, "Help msg", Some("VALUE"));
+    //! // The `run_custom_args()` function allows you to provide the Program with custom Arguments, that aren't from the command line. It does the exact same thing as `run()`.
+    //! parser.run_custom_args(Parser::args(&["target/debug/revparse", "POSITIONAL_ARGUMENT1", "--some-flag-that-takes-a-value", "value", "POSITIONAL_ARGUMENT2"]));
+    //! let pos_args: Vec<String> = parser.get_pos_args();
+    //! assert_eq!(pos_args[0], "POSITIONAL_ARGUMENT1");
+    //! assert_eq!(pos_args[1], "POSITIONAL_ARGUMENT2");
+    //! match parser.get("--some-flag-that-takes-a-value") {
+    //!     ArgState::Value(val) => assert_eq!(val, "value"),
+    //!     _ => panic!("Arguments were passed incorrectly!"),
+    //! };
     //! ```
     //! Here's an example Program, that takes 3 arguments, one of which can take a value:
     //! ```rust
@@ -273,16 +271,16 @@ impl<'a, 'b> Parser<'a> {
     /// Parses the arguments, and stores them in self or exits with the appropriate Error message.
     /// You have to run this function before using the .get() function.
     pub fn run(&mut self) {
-        self.run_priv(env::args());
+        self.run_custom_args(env::args());
     }
-    fn run_priv(&mut self, args: impl Iterator<Item = String>) {
+    /// ## Replaces the run() function, this function allows you to provide the program with custom Arguments other than std::env::args().
+    pub fn run_custom_args(&mut self, args: impl Iterator<Item = String>) {
         self.create_help();
         let mut next_is_val: Option<String> = None;
         self.parsed = Some(HashMap::new());
         let parsed = self.parsed.as_mut().unwrap();
         'outer: for e_arg in args.skip(1) {
-            if next_is_val.is_some() {
-                parsed.insert(next_is_val.unwrap(), Some(e_arg));
+            if next_is_val.is_some() { parsed.insert(next_is_val.unwrap(), Some(e_arg));
                 next_is_val = None;
                 continue 'outer;
             }
@@ -365,16 +363,15 @@ impl<'a, 'b> Parser<'a> {
                     }
                 }
             } else {
-                // pos_args:
                 if self.pres_pos_args.is_some() {
                     if self.max_pos_args_left <= 0 {
                         self.arg_does_not_exist(&e_arg);
                         exit(1);
                     }
-                    if self.pos_args.is_none() {
-                        self.pos_args = Some(Vec::new());
+                    if self.parsed_pos_args.is_none() {
+                        self.parsed_pos_args = Some(Vec::new());
                     }
-                    self.pos_args.as_mut().unwrap().push(e_arg);
+                    self.parsed_pos_args.as_mut().unwrap().push(e_arg);
                     self.max_pos_args_left -= 1;
                 } else {
                     self.arg_does_not_exist(&e_arg);
@@ -426,9 +423,28 @@ impl<'a, 'b> Parser<'a> {
             pres_pos_args: None,
             max_pos_args_left: 0,
             pos_arg_help: None,
-            pos_args: None,
+            parsed_pos_args: None,
         }
     }
+    /// # Help Message for Positional Arguments
+    /// ## Optional
+    /// ## Example Usage:
+    /// ```rust
+    /// use revparse::Parser;
+    /// let mut parser = Parser::new("grep");
+    /// parser.add_pos_arg("PATTERNS");
+    /// parser.add_pos_arg("[FILE]...");
+    /// // If you were to implement the help message of GNU grep:
+    /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep -i 'hello world' menu.h main.c\nPATTERNS can contain multiple patterns separated by newlines.");
+    /// parser.run(); // if the user now passes --help, the pos_arg_help message will be printed under "Usage: ..."
+    /// ```
+    /// Which would look like this:
+    /// ```txt
+    /// Usage: grep [OPTION]... PATTERNS [FILE]...
+    /// Search for PATTERNS in each FILE.
+    /// Example: grep -i 'hello world' menu.h main.c
+    /// PATTERNS can contain multiple patterns separated by newlines.
+    /// ```
     pub fn pos_arg_help(&mut self, help_msg: &'a str) {
         self.pos_arg_help = Some(help_msg);
     }
@@ -476,13 +492,15 @@ impl<'a, 'b> Parser<'a> {
             },
         ));
     }
-    /// Function for adding Positional Arguments (Arguments, that are passed without a flag, for example PATTERN in grep <PATTERN>)
+    /// # Adds Positional Arguments
     /// Usage:
     /// ```rust
     /// use revparse::Parser;
     /// let mut parser = Parser::new("your_program_name");
-    /// parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized anyways.
+    /// parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized.
     /// parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
+    /// parser.add_pos_arg("[FILE2]..."); // The "[]..." can be used to tell the user, that the argument is optional.
+    /// parser.add_pos_arg("[MODE]..."); // The names are needed for the help message.
     /// ```
     pub fn add_pos_arg(&mut self, name: &'a str) {
         self.max_pos_args_left += 1;
@@ -490,5 +508,27 @@ impl<'a, 'b> Parser<'a> {
             self.pres_pos_args = Some(Vec::new());
         }
         self.pres_pos_args.as_mut().unwrap().push(name);
+    }
+    /// ## Returns a Vector with all Positional arguments: `<Vec<String>`
+    /// ```rust
+    /// use revparse::Parser;
+    /// let mut parser = Parser::new("your_program_name");
+    /// parser.add_pos_arg("ARG");
+    /// parser.run();
+    /// let pos_args: Vec<String> = parser.get_pos_args();
+    /// match pos_args.len() {
+    ///     0 => println!("No positional argument was given"),
+    ///     1 => println!("Arg was: {}", pos_args[0]),
+    ///     _ => panic!("The Vectors length can't exceed the amount of times the add_pos_arg() function was called."),
+    /// }
+    /// ```
+    pub fn get_pos_args(&mut self) -> Vec<String> {
+        match mem::replace(&mut self.parsed_pos_args, None) {
+            Some(vec) => vec,
+            None => Vec::new(),
+        }
+    }
+    pub fn args(args: &[&str]) -> impl Iterator<Item = String> {
+        args.iter().map(|i| i.to_string())
     }
 }

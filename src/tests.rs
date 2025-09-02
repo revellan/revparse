@@ -5,8 +5,15 @@ fn base() -> Parser<'static> {
     parser.add_argument("--noval", Some("-n"), "Testmsg", None);
     parser
 }
-fn args(args: &[&str]) -> impl Iterator<Item = String> {
-    args.iter().map(|i| i.to_string())
+fn pos_args() -> Parser<'static> {
+    let mut parser = Parser::new("test");
+    parser.add_pos_arg("TEST");
+    parser.add_pos_arg("TEST2");
+    parser.add_argument("--aletter", Some("-a"), "help msg", None);
+    parser.add_argument("--bletter", Some("-b"), "help msg", None);
+    parser.add_argument("--cletter", Some("-c"), "help msg", None);
+    parser.add_argument("--value", Some("-v"), "help msg", Some("[VALUE]..."));
+    parser
 }
 #[test]
 fn basic_usage() {
@@ -28,7 +35,7 @@ fn basic_usage() {
 #[test]
 fn take_value_short_name() {
     let mut parser = base();
-    parser.run_priv(args(&["program_name", "-tvalue"]));
+    parser.run_custom_args(Parser::args(&["program_name", "-tvalue"]));
     if let ArgState::Value(s) = parser.get("--test") {
         assert_eq!("value", s);
     } else {
@@ -38,7 +45,7 @@ fn take_value_short_name() {
 #[test]
 fn take_value_short_name_distant() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "-t", "value"]));
+    parser.run_custom_args(Parser::args(&["n", "-t", "value"]));
     if let ArgState::Value(s) = parser.get("--test") {
         assert_eq!("value", s);
     } else {
@@ -48,7 +55,7 @@ fn take_value_short_name_distant() {
 #[test]
 fn take_value_long_name_eq_sign() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "--test=value"]));
+    parser.run_custom_args(Parser::args(&["n", "--test=value"]));
     if let ArgState::Value(s) = parser.get("--test") {
         assert_eq!("value", s);
     } else {
@@ -58,7 +65,7 @@ fn take_value_long_name_eq_sign() {
 #[test]
 fn take_value_long_name_distant() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "--test", "value"]));
+    parser.run_custom_args(Parser::args(&["n", "--test", "value"]));
     if let ArgState::Value(s) = parser.get("--test") {
         assert_eq!("value", s);
     } else {
@@ -69,36 +76,37 @@ fn take_value_long_name_distant() {
 #[should_panic]
 fn take_value_not_given() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "--test"]));
+    parser.run_custom_args(Parser::args(&["n", "--test"]));
 }
 
 #[test]
 #[should_panic]
 fn take_value_not_given_short_name() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "-t"]));
+    parser.run_custom_args(Parser::args(&["n", "-t"]));
 }
 #[test]
 #[should_panic]
 fn take_value_not_given_short_name_2() {
     let mut parser = base();
-    parser.run_priv(args(&["n", "-nt"]));
+    parser.run_custom_args(Parser::args(&["n", "-nt"]));
 }
 #[test]
 fn positional_arguments() {
-    let mut parser = Parser::new("test");
-    parser.add_pos_arg("TEST");
-    parser.add_pos_arg("TEST2");
-    parser.add_argument("--aletter", Some("-a"), "help msg", None);
-    parser.add_argument("--bletter", Some("-b"), "help msg", None);
-    parser.add_argument("--cletter", Some("-c"), "help msg", None);
-    parser.run_priv(args(&["n", "PARG1", "-abc", "PARG2"]));
-    match parser.pos_args {
-        Some(vec) => {
-            assert_eq!(vec.len(), 2);
-            assert_eq!(vec[0], "PARG1");
-            assert_eq!(vec[1], "PARG2");
-        },
-        None => panic!("Positional arguments were not parsed correctly!!!") 
-    }
+    let mut parser = pos_args();
+    parser.run_custom_args(Parser::args(&["n", "PARG1", "-abc", "PARG2"]));
+    let vec = parser.get_pos_args();
+    assert_eq!(vec.len(), 2);
+    assert_eq!(vec[0], "PARG1");
+    assert_eq!(vec[1], "PARG2");
+    let mut parser = pos_args();
+    parser.run_custom_args(Parser::args(&["n", "--aletter", "--value", "value", "PARG1", "-bc"]));
+    let vec = parser.get_pos_args();
+    assert_eq!(vec.len(), 1);
+    assert_eq!(vec[0], "PARG1");
+    let value = match parser.get("--value") {
+        ArgState::Value(v) => v,
+        _ => panic!("Failed to parse value."),
+    };
+    assert_eq!(value, "value");
 }

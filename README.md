@@ -81,7 +81,7 @@ parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you 
 
 Parsed Positional Arguments can seen in the only public Structure field of Parser: pos_args
 
-The type of pos_args is Option<Vec<String>>.
+The type of pos_args is `Option<Vec<String>>`.
 If there were no positional arguments given by the user, it will be None.
 All positional arguments given by the user, as far as allowed, will be pushed onto the Vector as a String.
 
@@ -91,9 +91,10 @@ use revparse::Parser;
 let mut parser = Parser::new("your_program_name");
 parser.add_pos_arg("DIRECTORY");
 parser.run();
-match parser.pos_args {
-    None => println!("The user didn't enter any positional arguments.");
-    Some(vec) => println!("The user entered following positional arguments: {:?}", vec)
+if parser.pos_args.len() != 0 {
+    println!("The user entered following positional arguments: {:?}", vec);
+} else {
+    pritnln!("The user did not enter any positional arguments.");
 }
 ```
 

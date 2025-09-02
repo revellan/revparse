@@ -30,14 +30,14 @@ fn main() {
         ArgState::Value(_) => panic!("Impossible!"),
     };
     println!("--load {}", load);
-    match parser.pos_args {
-        Some(vec) => {
-            let mut c = 0;
-            for i in vec {
-                c += 1;
-                println!("Positional arg {}: '{}'", c, i);
-            }
+    let pos_args = parser.get_pos_args();
+    if pos_args.len() != 0 {
+        let mut c: u8 = 0;
+        for i in pos_args {
+            c += 1;
+            println!("Positional arg {}: '{}'", c, i);
         }
-        None => println!("No positional arguments given."),
+    } else {
+        println!("No positional arguments given.");
     }
 }

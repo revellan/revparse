@@ -1,9 +1,8 @@
 [package]
 name = "revparse"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2024"
 license = "MIT"
-license-file = "LICENSE"
 keywords = ["argument-parser", "gnu", "flags", "options", "subcommands"]
 description = "GNU Argument Parser, that's easy to use."
 repository = "https://github.com/revellan/revparse"
