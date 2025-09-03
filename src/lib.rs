@@ -31,7 +31,7 @@ pub struct Parser<'a> {
     pos_arg_help: Option<&'a str>,
     parsed_pos_args: Option<Vec<String>>,
 }
-impl<'a, 'b> Parser<'a> {
+impl<'a> Parser<'a> {
     //! The Parser struct is the Heart of revparse.
     //! Here is a brief explanation.
     //! # revparse
