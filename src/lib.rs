@@ -59,7 +59,9 @@ impl<'a, 'b> Parser<'a> {
     //! match argument {
     //!     ArgState::False => println!("--argument wasn't called"),
     //!     ArgState::Value(val) => println!("--argument was called with the value: {}", val),
-    //!     ArgState::True => panic!("Impossible, ArgState::True will only be returned, if the last argument to parser.add_argument() is None."),
+    //!     // ArgState::True will be returned, if you're argument takes no value, eg. if you replaced 'Some("VALUE")' above with 'None'.
+    //!     // Else ArgState::Value(val) will be returned.
+    //!     ArgState::True => panic!("Impossible, ArgState::True will only be returned, if the last parameter in parser.add_argument() is None."),
     //! }
     //! ```
     //! # Positional Arguments
@@ -413,7 +415,7 @@ impl<'a, 'b> Parser<'a> {
     /// parser.add_pos_arg("PATTERNS");
     /// parser.add_pos_arg("[FILE]...");
     /// // If you were to implement the help message of GNU grep:
-    /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt")
+    /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt");
     /// // Disclaimer: This is not the official help message of GNU grep, but merely an example
     /// parser.run(); // if the user now passes --help, the pos_arg_help message will be printed under "Usage: ..."
     /// ```
@@ -426,34 +428,25 @@ impl<'a, 'b> Parser<'a> {
     pub fn pos_arg_help(&mut self, help_msg: &'a str) {
         self.pos_arg_help = Some(help_msg);
     }
-    /// To add arguments, you can use the .add_argument() function on a Parser instance.
-    /// The function takes 4 Parameters apart from self.
-    /// The First is the long name, that has to start with "--" and is required, not optional.
-    /// The Second is an optional short name, of type Option<&str>. If it is set to None, there will be no short name for that argument, if you want a short name, like "-e" you will have to wrap it in Some() like this Some("-e"). Short names have to start with a '-' and only contain one other character.
-    /// The Third option is the help message, that will be shown behind the corresponding option, when --help is called.
-    /// The Fourth options is about wheter the argument can take values, or arguments like this:
-    /// ```sh
-    /// your_program_name --option-that-takes-a-value="This is the value"
-    /// your_program_name --option-that-takes-a-value "This is the value"
-    /// your_program_name -o"This is the value"
-    /// your_program_name -o "This is the value"
-    /// ```
-    /// If you want this to be possible, you have to provide a name for the value to be shown in the help message wrapped in a Some().
-    /// For example to add an argument "--start-process" that takes a value "PROCESS" you have to write the following:
+    /// # Adds Arguments
+    /// ## Usage
     /// ```rust
     /// use revparse::Parser;
-    /// let mut parser = Parser::new("your_program_name");
-    /// parser.add_argument("--start-process", Some("-s"), "Start some process, this is the help message", Some("PROCESS"));
+    /// let mut parser: Parser = Parser::new("your_program_name");
+    /// // call add_argument() on a mutable Parser instance
+    /// parser.add_argument(
+    ///     "--takes-no-value", // long name
+    ///     Some("-n"),         // *optional* short name
+    ///     "Takes no value",   // Help message
+    ///     None,               // Take no value if None
+    /// ); 
+    /// parser.add_argument(
+    ///     "--takes-value",    // Same as before
+    ///     None,               // This time without a short name
+    ///     "Takes a value, eg. --takes-value=\"value\"",
+    ///     Some("VALUE"),      // Brief keyword about the value for the help message
+    /// );
     /// ```
-    /// You don't have to provide "PROCESS" in capital letters, since they will be capitalized automatically. This is what "PROCESS" is needed for:
-    /// ```txt
-    /// Usage: your_program_name [OPTION]...
-    ///
-    /// Options:
-    ///   -s, --start-process=PROCESS  Start some process, this is the help message
-    ///   ^-2 ^-1.parameter   ^-4.p.   ^-3.parameter
-    /// ```
-    ///
     pub fn add_argument(
         &mut self,
         long_name: &'a str,
