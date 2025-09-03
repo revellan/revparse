@@ -413,7 +413,8 @@ impl<'a, 'b> Parser<'a> {
     /// parser.add_pos_arg("PATTERNS");
     /// parser.add_pos_arg("[FILE]...");
     /// // If you were to implement the help message of GNU grep:
-    /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt\nPATTERNS can contain multiple patterns separated by newlines.");
+    /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt")
+    /// // Disclaimer: This is not the official help message of GNU grep, but merely an example
     /// parser.run(); // if the user now passes --help, the pos_arg_help message will be printed under "Usage: ..."
     /// ```
     /// Which would look like this:
@@ -421,7 +422,6 @@ impl<'a, 'b> Parser<'a> {
     /// Usage: grep [OPTION]... PATTERNS [FILE]...
     /// Search for PATTERNS in each FILE.
     /// Example: grep 'hello world' file.txt
-    /// PATTERNS can contain multiple patterns separated by newlines.
     /// ```
     pub fn pos_arg_help(&mut self, help_msg: &'a str) {
         self.pos_arg_help = Some(help_msg);
