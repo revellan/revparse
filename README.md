@@ -112,7 +112,7 @@ if let ArgState::True = parser.get("--arg-b") {
 // Positional Arguments
 let pos_args: Vec<String> = parser.get_pos_args();
 assert_eq!(pos_args.len(), 2); // Length is 2, as two positional Arguments were provided.
-assert_eq!(pos_args[0], "pos_arg1");
+assert_eq!(pos_args[0], "-pos arg that starts with -");
 assert_eq!(pos_args[1], "This is a positional Argument, because -b does not take a value");
 ```
 #### Help Message:
