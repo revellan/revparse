@@ -280,6 +280,9 @@ impl<'a> Parser<'a> {
                     }
                     self.parsed_pos_args.as_mut().unwrap().push(e_arg);
                     self.max_pos_args_left -= 1;
+                    if self.min_pos_args > 0 {
+                        self.min_pos_args -= 1;
+                    }
                 } else {
                     self.arg_does_not_exist(&e_arg);
                     exit(1);
@@ -377,6 +380,9 @@ impl<'a> Parser<'a> {
                     }
                     self.parsed_pos_args.as_mut().unwrap().push(e_arg);
                     self.max_pos_args_left -= 1;
+                    if self.min_pos_args > 0 {
+                        self.min_pos_args -= 1;
+                    }
                 } else {
                     self.arg_does_not_exist(&e_arg);
                     exit(1);
@@ -386,7 +392,17 @@ impl<'a> Parser<'a> {
         if next_is_val.is_some() {
             self.val_missing(next_is_val.as_ref().unwrap());
             exit(1);
+        } else if self.min_pos_args != 0 {
+            self.print_usage();
+            exit(1);
         }
+    }
+    fn print_usage(&self) {
+        println!(
+            "{}\nTry '{} --help' for more information.",
+            self.usage.as_ref().unwrap(),
+            self.program_name
+        );
     }
     /// Function to get the results of the arguments. Returns an instance of ArgState.
     /// Example code:
@@ -437,7 +453,7 @@ impl<'a> Parser<'a> {
     /// ```rust
     /// use revparse::Parser;
     /// let mut parser = Parser::new("grep");
-    /// parser.add_pos_arg("PATTERNS", true);
+    /// parser.add_pos_arg("PATTERNS", false);
     /// parser.add_pos_arg("[FILE]...", false);
     /// // If you were to implement the help message of GNU grep:
     /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt");

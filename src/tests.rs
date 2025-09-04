@@ -7,7 +7,7 @@ fn base() -> Parser<'static> {
 }
 fn pos_args() -> Parser<'static> {
     let mut parser = Parser::new("test");
-    parser.add_pos_arg("TEST", false);
+    parser.add_pos_arg("TEST", true);
     parser.add_pos_arg("TEST2", false);
     parser.add_argument("--aletter", Some("-a"), "help msg", None);
     parser.add_argument("--bletter", Some("-b"), "help msg", None);
@@ -117,4 +117,10 @@ fn positional_arguments() {
         _ => panic!("Failed to parse value."),
     };
     assert_eq!(value, "value");
+}
+#[test]
+#[should_panic]
+fn required_pos_args_not_given() {
+    let mut parser = pos_args();
+    parser.run_custom_args(Parser::args(&["n"]));
 }
