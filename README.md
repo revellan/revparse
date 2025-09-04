@@ -33,12 +33,16 @@ Positional Arguments are Values passed without flags.
 use revparse::Parser;
 let mut parser: Parser = Parser::new("grep");
 // This would store the first argument, that doesn't start with '-' AND isn't after a flag, that takes a value.
-parser.add_pos_arg("PATTERN");
+parser.add_pos_arg(
+    "PATTERN",
+    false,   // Positional argument is not required
+);
 parser.run();
 let pos_args: Vec<String> = parser.get_pos_args();
 if pos_args.len() != 0 {
-    // So in this case 'grep smth' would give you the String "smth" in pos_args[0]. The string can't start with '-'.
-    // If you want your users to pass values with '-', use a flag.
+    // So in this case 'grep smth' would give you the String "smth" in pos_args[0].
+    // The string can't start with '-', unless the user types -- before it:
+    // grep -- "-string"
     println!("The first positional argument was: {}", pos_args[0]);
 }
 ```
@@ -80,15 +84,16 @@ use revparse::{ArgState, Parser};
 let mut parser: Parser = Parser::new("your_program_name");
 parser.add_argument("--arg-a", Some("-a"), "Takes a value", Some("VAL_NAME"));
 parser.add_argument("--arg-b", Some("-b"), "Does not take a value", None);
-parser.add_pos_arg("EXAMPLE");
-parser.add_pos_arg("[ANOTHER]...");
+parser.add_pos_arg("EXAMPLE", true); // If not provided, the program will complain
+parser.add_pos_arg("[ANOTHER]...", false); // The program will not complain
 // You can see the help message format below
 parser.pos_arg_help("Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc\nCan contain new line chars.");
 // Normally you would call .run(), but in this example we will call .run_custom_args() instead, to test it.
 parser.run_custom_args(Parser::args(&[
-    "your_program_name", // Program name will be ignored
-    "--arg-a=value",     // "-a" "value" is valid too
-    "pos_arg1",           // Valid, because it doesn't start with a '-'
+    "your_program_name",// Program name will be ignored
+    "--arg-a=value",    // "-a" "value" is valid too
+    "--",               // means the next arg will be a positional argument
+    "-pos arg that starts with -", // Valid, because it is the next argument after --
     "-b",
     "This is a positional Argument, because -b does not take a value",
 ]));

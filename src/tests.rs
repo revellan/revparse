@@ -7,8 +7,8 @@ fn base() -> Parser<'static> {
 }
 fn pos_args() -> Parser<'static> {
     let mut parser = Parser::new("test");
-    parser.add_pos_arg("TEST");
-    parser.add_pos_arg("TEST2");
+    parser.add_pos_arg("TEST", false);
+    parser.add_pos_arg("TEST2", false);
     parser.add_argument("--aletter", Some("-a"), "help msg", None);
     parser.add_argument("--bletter", Some("-b"), "help msg", None);
     parser.add_argument("--cletter", Some("-c"), "help msg", None);
@@ -100,10 +100,18 @@ fn positional_arguments() {
     assert_eq!(vec[0], "PARG1");
     assert_eq!(vec[1], "PARG2");
     let mut parser = pos_args();
-    parser.run_custom_args(Parser::args(&["n", "--aletter", "--value", "value", "PARG1", "-bc"]));
+    parser.run_custom_args(Parser::args(&[
+        "n",
+        "--aletter",
+        "--value",
+        "value",
+        "--",
+        "-PARG1",
+        "-bc",
+    ]));
     let vec = parser.get_pos_args();
     assert_eq!(vec.len(), 1);
-    assert_eq!(vec[0], "PARG1");
+    assert_eq!(vec[0], "-PARG1");
     let value = match parser.get("--value") {
         ArgState::Value(v) => v,
         _ => panic!("Failed to parse value."),

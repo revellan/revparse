@@ -27,6 +27,7 @@ pub struct Parser<'a> {
     usage: Option<String>,
     help: Option<String>,
     pres_pos_args: Option<Vec<&'a str>>,
+    min_pos_args: u16,
     max_pos_args_left: u16,
     pos_arg_help: Option<&'a str>,
     parsed_pos_args: Option<Vec<String>>,
@@ -59,9 +60,7 @@ impl<'a> Parser<'a> {
     //! match argument {
     //!     ArgState::False => println!("--argument wasn't called"),
     //!     ArgState::Value(val) => println!("--argument was called with the value: {}", val),
-    //!     // ArgState::True will be returned, if you're argument takes no value, eg. if you replaced 'Some("VALUE")' above with 'None'.
-    //!     // Else ArgState::Value(val) will be returned.
-    //!     ArgState::True => panic!("Impossible, ArgState::True will only be returned, if the last parameter in parser.add_argument() is None."),
+    //!     ArgState::True => panic!("Impossible, ArgState::True will only be returned, if the last argument to parser.add_argument() is None."),
     //! }
     //! ```
     //! # Positional Arguments
@@ -71,12 +70,16 @@ impl<'a> Parser<'a> {
     //! use revparse::Parser;
     //! let mut parser: Parser = Parser::new("grep");
     //! // This would store the first argument, that doesn't start with '-' AND isn't after a flag, that takes a value.
-    //! parser.add_pos_arg("PATTERN");
+    //! parser.add_pos_arg(
+    //!     "PATTERN",
+    //!     false,   // Positional argument is not required
+    //! );
     //! parser.run();
     //! let pos_args: Vec<String> = parser.get_pos_args();
     //! if pos_args.len() != 0 {
-    //!     // So in this case 'grep smth' would give you the String "smth" in pos_args[0]. The string can't start with '-'.
-    //!     // If you want your users to pass values with '-', use a flag.
+    //!     // So in this case 'grep smth' would give you the String "smth" in pos_args[0].
+    //!     // The string can't start with '-', unless the user types -- before it:
+    //!     // grep -- "-string"
     //!     println!("The first positional argument was: {}", pos_args[0]);
     //! }
     //! ```
@@ -118,15 +121,16 @@ impl<'a> Parser<'a> {
     //! let mut parser: Parser = Parser::new("your_program_name");
     //! parser.add_argument("--arg-a", Some("-a"), "Takes a value", Some("VAL_NAME"));
     //! parser.add_argument("--arg-b", Some("-b"), "Does not take a value", None);
-    //! parser.add_pos_arg("EXAMPLE");
-    //! parser.add_pos_arg("[ANOTHER]...");
+    //! parser.add_pos_arg("EXAMPLE", true); // If not provided, the program will complain
+    //! parser.add_pos_arg("[ANOTHER]...", false); // The program will not complain
     //! // You can see the help message format below
     //! parser.pos_arg_help("Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc\nCan contain new line chars.");
     //! // Normally you would call .run(), but in this example we will call .run_custom_args() instead, to test it.
     //! parser.run_custom_args(Parser::args(&[
-    //!     "your_program_name", // Program name will be ignored
-    //!     "--arg-a=value",     // "-a" "value" is valid too
-    //!     "pos_arg1",           // Valid, because it doesn't start with a '-'
+    //!     "your_program_name",// Program name will be ignored
+    //!     "--arg-a=value",    // "-a" "value" is valid too
+    //!     "--",               // means the next arg will be a positional argument
+    //!     "-pos arg that starts with -", // Valid, because it is the next argument after --
     //!     "-b",
     //!     "This is a positional Argument, because -b does not take a value",
     //! ]));
@@ -145,7 +149,7 @@ impl<'a> Parser<'a> {
     //! // Positional Arguments
     //! let pos_args: Vec<String> = parser.get_pos_args();
     //! assert_eq!(pos_args.len(), 2); // Length is 2, as two positional Arguments were provided.
-    //! assert_eq!(pos_args[0], "pos_arg1");
+    //! assert_eq!(pos_args[0], "-pos arg that starts with -");
     //! assert_eq!(pos_args[1], "This is a positional Argument, because -b does not take a value");
     //! ```
     //! #### Help Message:
@@ -158,7 +162,6 @@ impl<'a> Parser<'a> {
     //!   -a, --arg-a=VAL_NAME      Takes a value
     //!   -b, --arg-b               Does not take a value
     //! ```
-    //!
     fn arg_does_not_exist(&self, arg: &str) {
         if arg == "--help" || arg == "-h" {
             self.no_val_allowed(arg);
@@ -256,6 +259,7 @@ impl<'a> Parser<'a> {
     pub fn run_custom_args(&mut self, args: impl Iterator<Item = String>) {
         self.create_help();
         let mut next_is_val: Option<String> = None;
+        let mut next_is_pos: bool = false;
         self.parsed = Some(HashMap::new());
         let parsed = self.parsed.as_mut().unwrap();
         'outer: for e_arg in args.skip(1) {
@@ -264,11 +268,31 @@ impl<'a> Parser<'a> {
                 next_is_val = None;
                 continue 'outer;
             }
+            if next_is_pos {
+                next_is_pos = false;
+                if self.pres_pos_args.is_some() {
+                    if self.max_pos_args_left <= 0 {
+                        self.arg_does_not_exist(&e_arg);
+                        exit(1);
+                    }
+                    if self.parsed_pos_args.is_none() {
+                        self.parsed_pos_args = Some(Vec::new());
+                    }
+                    self.parsed_pos_args.as_mut().unwrap().push(e_arg);
+                    self.max_pos_args_left -= 1;
+                } else {
+                    self.arg_does_not_exist(&e_arg);
+                    exit(1);
+                }
+                continue 'outer;
+            }
             if e_arg == "--help" || e_arg == "-h" {
                 self.print_help();
                 exit(0);
-            }
-            if e_arg.starts_with("--") {
+            } else if e_arg == "--" {
+                next_is_pos = true;
+                continue 'outer;
+            } else if e_arg.starts_with("--") {
                 match e_arg
                     .split_once('=')
                     .map(|(arg_name, val)| (arg_name.to_string(), val.to_string()))
@@ -401,6 +425,7 @@ impl<'a> Parser<'a> {
             usage: None,
             help: None,
             pres_pos_args: None,
+            min_pos_args: 0,
             max_pos_args_left: 0,
             pos_arg_help: None,
             parsed_pos_args: None,
@@ -412,8 +437,8 @@ impl<'a> Parser<'a> {
     /// ```rust
     /// use revparse::Parser;
     /// let mut parser = Parser::new("grep");
-    /// parser.add_pos_arg("PATTERNS");
-    /// parser.add_pos_arg("[FILE]...");
+    /// parser.add_pos_arg("PATTERNS", true);
+    /// parser.add_pos_arg("[FILE]...", false);
     /// // If you were to implement the help message of GNU grep:
     /// parser.pos_arg_help("Search for PATTERNS in each FILE.\nExample: grep 'hello world' file.txt");
     /// // Disclaimer: This is not the official help message of GNU grep, but merely an example
@@ -439,7 +464,7 @@ impl<'a> Parser<'a> {
     ///     Some("-n"),         // *optional* short name
     ///     "Takes no value",   // Help message
     ///     None,               // Take no value if None
-    /// ); 
+    /// );
     /// parser.add_argument(
     ///     "--takes-value",    // Same as before
     ///     None,               // This time without a short name
@@ -468,12 +493,16 @@ impl<'a> Parser<'a> {
     /// ```rust
     /// use revparse::Parser;
     /// let mut parser = Parser::new("your_program_name");
-    /// parser.add_pos_arg("DIRECTORY"); // can be any name, if not in capital letters, it will be capitalized.
-    /// parser.add_pos_arg("FILE"); // you can add as many positional arguments, as you want.
-    /// parser.add_pos_arg("[FILE2]..."); // The "[]..." can be used to tell the user, that the argument is optional.
-    /// parser.add_pos_arg("[MODE]..."); // The names are needed for the help message.
+    /// parser.add_pos_arg("DIRECTORY", true); // can be any name, if not in capital letters, it will be capitalized.
+    /// parser.add_pos_arg("FILE", true); // you can add as many positional arguments, as you want.
+    /// parser.add_pos_arg("REQUIRED", true); // if the second argument to the function is true, the user is forced to give that positional argument
+    /// parser.add_pos_arg("[FILE2]...", false); // The "[]..." can be used to tell the user, that the argument is optional.
+    /// parser.add_pos_arg("[MODE]...", true); // The names are needed for the help message.
     /// ```
-    pub fn add_pos_arg(&mut self, name: &'a str) {
+    pub fn add_pos_arg(&mut self, name: &'a str, required: bool) {
+        if required {
+            self.min_pos_args += 1;
+        }
         self.max_pos_args_left += 1;
         if self.pres_pos_args.is_none() {
             self.pres_pos_args = Some(Vec::new());
@@ -484,7 +513,7 @@ impl<'a> Parser<'a> {
     /// ```rust
     /// use revparse::Parser;
     /// let mut parser = Parser::new("your_program_name");
-    /// parser.add_pos_arg("ARG");
+    /// parser.add_pos_arg("ARG", false);
     /// parser.run();
     /// let pos_args: Vec<String> = parser.get_pos_args();
     /// match pos_args.len() {
