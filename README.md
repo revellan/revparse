@@ -35,7 +35,7 @@ let mut parser: Parser = Parser::new("grep");
 // This would store the first argument, that doesn't start with '-' AND isn't after a flag, that takes a value.
 parser.add_pos_arg(
     "PATTERN",
-    false,   // Positional argument is not required
+    false,   // if false, then the Positional argument is not required to be given by the user
 );
 parser.run();
 let pos_args: Vec<String> = parser.get_pos_args();
@@ -84,8 +84,8 @@ use revparse::{ArgState, Parser};
 let mut parser: Parser = Parser::new("your_program_name");
 parser.add_argument("--arg-a", Some("-a"), "Takes a value", Some("VAL_NAME"));
 parser.add_argument("--arg-b", Some("-b"), "Does not take a value", None);
-parser.add_pos_arg("EXAMPLE", true); // If not provided, the program will complain
-parser.add_pos_arg("[ANOTHER]...", false); // The program will not complain
+parser.add_pos_arg("EXAMPLE", true); // User is forced to provide that positional argument
+parser.add_pos_arg("[ANOTHER]...", false); // User doesn't have to provide that positional argument
 // You can see the help message format below
 parser.pos_arg_help("Help Message Shown under 'Usage:', EXAMPLE can be used to ... etc\nCan contain new line chars.");
 // Normally you would call .run(), but in this example we will call .run_custom_args() instead, to test it.
