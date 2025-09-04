@@ -166,7 +166,7 @@ impl<'a> Parser<'a> {
         if arg == "--help" || arg == "-h" {
             self.no_val_allowed(arg);
         } else {
-            println!(
+            eprintln!(
                 "{}: unrecognized option '{}'\n{}\nTry '{} --help' for more information.",
                 self.program_name,
                 arg,
@@ -233,7 +233,7 @@ impl<'a> Parser<'a> {
         );
     }
     fn no_val_allowed(&self, arg: &str) {
-        println!(
+        eprintln!(
             "{}: option '{}' doesn't allow an argument\n{}\nTry '{} --help' for more information.",
             self.program_name,
             arg,
@@ -242,7 +242,7 @@ impl<'a> Parser<'a> {
         );
     }
     fn val_missing(&self, arg: &str) {
-        println!(
+        eprintln!(
             "{}: option '{}' requires an argument\n{}\nTry '{} --help' for more information.",
             self.program_name,
             arg,
@@ -366,7 +366,7 @@ impl<'a> Parser<'a> {
         }
     }
     fn print_usage(&self) {
-        println!(
+        eprintln!(
             "{}\nTry '{} --help' for more information.",
             self.usage.as_ref().unwrap(),
             self.program_name
