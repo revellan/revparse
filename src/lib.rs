@@ -261,8 +261,8 @@ impl<'a> Parser<'a> {
         let mut next_is_val: Option<String> = None;
         let mut next_is_pos: bool = false;
         self.parsed = Some(HashMap::new());
-        let parsed = self.parsed.as_mut().unwrap();
         'outer: for e_arg in args.skip(1) {
+            let parsed = self.parsed.as_mut().unwrap();
             if next_is_val.is_some() {
                 parsed.insert(next_is_val.unwrap(), Some(e_arg));
                 next_is_val = None;
@@ -270,23 +270,7 @@ impl<'a> Parser<'a> {
             }
             if next_is_pos {
                 next_is_pos = false;
-                if self.pres_pos_args.is_some() {
-                    if self.max_pos_args_left <= 0 {
-                        self.arg_does_not_exist(&e_arg);
-                        exit(1);
-                    }
-                    if self.parsed_pos_args.is_none() {
-                        self.parsed_pos_args = Some(Vec::new());
-                    }
-                    self.parsed_pos_args.as_mut().unwrap().push(e_arg);
-                    self.max_pos_args_left -= 1;
-                    if self.min_pos_args > 0 {
-                        self.min_pos_args -= 1;
-                    }
-                } else {
-                    self.arg_does_not_exist(&e_arg);
-                    exit(1);
-                }
+                self.internal_add_pos_arg(e_arg);
                 continue 'outer;
             }
             if e_arg == "--help" || e_arg == "-h" {
@@ -370,23 +354,7 @@ impl<'a> Parser<'a> {
                     }
                 }
             } else {
-                if self.pres_pos_args.is_some() {
-                    if self.max_pos_args_left <= 0 {
-                        self.arg_does_not_exist(&e_arg);
-                        exit(1);
-                    }
-                    if self.parsed_pos_args.is_none() {
-                        self.parsed_pos_args = Some(Vec::new());
-                    }
-                    self.parsed_pos_args.as_mut().unwrap().push(e_arg);
-                    self.max_pos_args_left -= 1;
-                    if self.min_pos_args > 0 {
-                        self.min_pos_args -= 1;
-                    }
-                } else {
-                    self.arg_does_not_exist(&e_arg);
-                    exit(1);
-                }
+                self.internal_add_pos_arg(e_arg);
             }
         }
         if next_is_val.is_some() {
@@ -503,6 +471,25 @@ impl<'a> Parser<'a> {
                 take_value,
             },
         ));
+    }
+    fn internal_add_pos_arg(&mut self, e_arg: String) {
+        if self.pres_pos_args.is_some() {
+            if self.max_pos_args_left <= 0 {
+                self.arg_does_not_exist(&e_arg);
+                exit(1);
+            }
+            if self.parsed_pos_args.is_none() {
+                self.parsed_pos_args = Some(Vec::new());
+            }
+            self.parsed_pos_args.as_mut().unwrap().push(e_arg);
+            self.max_pos_args_left -= 1;
+            if self.min_pos_args > 0 {
+                self.min_pos_args -= 1;
+            }
+        } else {
+            self.arg_does_not_exist(&e_arg);
+            exit(1);
+        }
     }
     /// # Adds Positional Arguments
     /// Usage:
