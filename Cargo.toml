@@ -1,11 +1,11 @@
 [package]
 name = "revparse"
-version = "1.3.3"
+version = "1.3.4"
 edition = "2024"
 license = "MIT"
 keywords = ["argument", "cli", "arg", "parser", "parse"]
 categories = ["command-line-interface"]
-description = "GNU Style Argument Parser, that's easy to use."
+description = "GNU Style CLI Argument Parser, that's easy to use."
 repository = "https://github.com/revellan/revparse"
 homepage = "https://revparse.revellan.com"
 readme = "README.md"

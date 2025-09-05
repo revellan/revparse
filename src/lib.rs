@@ -225,8 +225,9 @@ impl<'a> Parser<'a> {
             help.push('\n');
         }
     }
-    fn print_help(&self) {
-        println!(
+    /// Print the help message
+    pub fn print_help(&self) {
+        print!(
             "{}{}",
             self.usage.as_ref().unwrap(),
             self.help.as_ref().unwrap()
@@ -365,7 +366,13 @@ impl<'a> Parser<'a> {
             exit(1);
         }
     }
-    fn print_usage(&self) {
+    /// Print usage, eg. if the user entered a wrong value
+    /// Usage with program name "grep" and two positional arguments "PATTERN" and "\[FILE\]..."
+    /// ```txt
+    /// Usage: grep [OPTION]... PATTERNS [FILE]...
+    /// Try 'grep --help' for more information.
+    /// ```
+    pub fn print_usage(&self) {
         eprintln!(
             "{}\nTry '{} --help' for more information.",
             self.usage.as_ref().unwrap(),
