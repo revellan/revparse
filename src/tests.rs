@@ -7,8 +7,9 @@ fn base() -> Parser<'static> {
 }
 fn pos_args() -> Parser<'static> {
     let mut parser = Parser::new("test");
-    parser.add_pos_arg("TEST", true);
-    parser.add_pos_arg("TEST2", false);
+    parser.add_pos_arg("TEST");
+    parser.add_pos_arg("TEST2");
+    parser.min_pos_args(1);
     parser.add_argument("--aletter", Some("-a"), "help msg", None);
     parser.add_argument("--bletter", Some("-b"), "help msg", None);
     parser.add_argument("--cletter", Some("-c"), "help msg", None);

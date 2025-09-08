@@ -9,8 +9,9 @@ fn main() {
     );
     parser.add_argument("--reload", Some("-r"), "reload the page", None);
     parser.add_argument("--load", Some("-l"), "load the page", None);
-    parser.add_pos_arg("DIRECTORY", true);
-    parser.add_pos_arg("[FILE]...", false);
+    parser.add_pos_arg("DIRECTORY");
+    parser.add_pos_arg("[FILE]...");
+    parser.min_pos_args(1);
     parser.run();
     let start_process = match parser.get("--start-process") {
         ArgState::False => "wasn't called".to_string(),
