@@ -35,7 +35,7 @@ pub struct Parser<'a> {
 /// ```rust
 /// let mut parser = revparse::Parser::new("executable_name"); // for grep "executable_name" would be "grep"
 /// ```
-/// There are two types of flag arguments the user can give
+/// There are two types of arguments the user can give
 ///
 /// One that takes a value, and one that doesn't:
 /// ```txt
@@ -85,7 +85,7 @@ pub struct Parser<'a> {
 /// let mut parser = revparse::Parser::new("grep");
 /// parser.add_argument("--file", Some("-f"), "take PATTERNS from FILE", Some("FILE"));
 /// parser.run();
-/// let file: Option<String> = parser.get_val("--version"); // DIFFERENT FUNCTION THAN ABOVE !!!
+/// let file: Option<String> = parser.get_val("--file"); // DIFFERENT FUNCTION THAN ABOVE !!!
 ///
 /// // The 'file' variable will be None, if the user didn't enter this flag, and Some(String) if he did
 /// assert_eq!(file, None); // Since this is a doc-test, the flag will not have been given
@@ -459,7 +459,7 @@ impl<'a> Parser<'a> {
     /// let mut parser = revparse::Parser::new("grep");
     /// parser.add_argument("--file", Some("-f"), "take PATTERNS from FILE", Some("FILE"));
     /// parser.run();
-    /// let file: Option<String> = parser.get_val("--version"); // DIFFERENT FUNCTION THAN ABOVE !!!
+    /// let file: Option<String> = parser.get_val("--file");
     ///
     /// // The 'file' variable will be None, if the user didn't enter this flag, and Some(String) if he did
     /// assert_eq!(file, None); // Since this is a doc-test, the flag will not have been given
