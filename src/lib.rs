@@ -196,7 +196,6 @@ pub struct Parser<'a> {
 /// parser.pos_arg_help("Search for PATTERNS in each FILE.
 /// Example: grep -i 'hello world' menu.h main.c
 /// PATTERNS can contain multiple patterns separated by newlines.");
-/// parser.run();
 /// ```
 impl<'a> Parser<'a> {
     fn arg_does_not_exist(&self, arg: &str) {
@@ -439,7 +438,7 @@ impl<'a> Parser<'a> {
     /// let mut parser = revparse::Parser::new("grep");
     /// parser.add_pos_arg("PATTERNS");
     /// parser.add_pos_arg("[FILE]...");
-    /// parser.min_pos_args(1);         // Force the user to enter a PATTERN
+    ///
     /// parser.pos_arg_help("Search for PATTERNS in each FILE.
     /// Example: grep -i 'hello world' menu.h main.c
     /// PATTERNS can contain multiple patterns separated by newlines.");
@@ -569,7 +568,6 @@ impl<'a> Parser<'a> {
     /// parser.pos_arg_help("Search for PATTERNS in each FILE.
     /// Example: grep -i 'hello world' menu.h main.c
     /// PATTERNS can contain multiple patterns separated by newlines.");
-    /// parser.run();
     /// ```
     pub fn pos_arg_help(&mut self, help_msg: &'a str) {
         self.pos_arg_help = Some(help_msg);
