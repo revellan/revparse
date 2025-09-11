@@ -1,6 +1,6 @@
 [package]
 name = "revparse"
-version = "1.4.1"
+version = "2.1.1"
 edition = "2024"
 license = "MIT"
 keywords = ["argument", "cli", "arg", "parser", "parse"]

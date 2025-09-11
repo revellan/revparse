@@ -1,5 +1,11 @@
-use revparse::{ArgState, Parser};
+use revparse::Parser;
 fn main() {
+    let mut parser = revparse::Parser::new("executable_name");
+    parser.add_argument("--test", Some("-t"), "test argument to demonstrate print_help", None);
+    parser.run(); // This will create the help message
+    parser.print_help(); // This will print it.
+}
+fn _main() {
     let mut parser = Parser::new("parser");
     parser.add_argument(
         "--start-process",                               // long name
@@ -13,22 +19,19 @@ fn main() {
     parser.add_pos_arg("[FILE]...");
     parser.min_pos_args(1);
     parser.run();
-    let start_process = match parser.get("--start-process") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => panic!("Impossible!"),
-        ArgState::Value(s) => format!("was called with '{}' as an argument", s),
+    let start_process = match parser.get_val("--start-process") {
+        None => "wasn't called".to_string(),
+        Some(s) => format!("was called with '{}' as an argument", s),
     };
     println!("\n--start-process {}", start_process);
-    let reload = match parser.get("--reload") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => "was called".to_string(),
-        ArgState::Value(_) => panic!("Impossible!"),
+    let reload = match parser.get_noval("--reload") {
+        false => "wasn't called".to_string(),
+        true => "was called".to_string(),
     };
     println!("--reload {}", reload);
-    let load = match parser.get("--load") {
-        ArgState::False => "wasn't called".to_string(),
-        ArgState::True => "was called".to_string(),
-        ArgState::Value(_) => panic!("Impossible!"),
+    let load = match parser.get_noval("--load") {
+        false => "wasn't called".to_string(),
+        true => "was called".to_string(),
     };
     println!("--load {}", load);
     let pos_args = parser.get_pos_args();
