@@ -17,7 +17,7 @@ let mut parser = revparse::Parser::new("grep");
 parser.add_argument(
     "--version",
     Some("-V"),     // Short name (optional)
-    "display version information and exit", // Official GNU grep help message for --version
+    "display version information and exit", // help message
     None,           // Take no value
 );
 ```
@@ -31,7 +31,7 @@ let mut parser = revparse::Parser::new("grep");
 parser.add_argument(
     "--file",
     Some("-f"),     // Short name (optional)
-    "take PATTERNS from FILE",  // from GNU grep
+    "take PATTERNS from FILE",  // help message
     Some("FILE"),   // Take a value called FILE to help the user understand what it is for
 );
 ```
