@@ -165,5 +165,4 @@ parser.min_pos_args(1);         // Force the user to enter a PATTERN
 parser.pos_arg_help("Search for PATTERNS in each FILE.
 Example: grep -i 'hello world' menu.h main.c
 PATTERNS can contain multiple patterns separated by newlines.");
-parser.run();
 ```
