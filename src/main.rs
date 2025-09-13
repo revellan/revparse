@@ -1,11 +1,5 @@
 use revparse::Parser;
 fn main() {
-    let mut parser = revparse::Parser::new("executable_name");
-    parser.add_argument("--test", Some("-t"), "test argument to demonstrate print_help", None);
-    parser.run(); // This will create the help message
-    parser.print_help(); // This will print it.
-}
-fn _main() {
     let mut parser = Parser::new("parser");
     parser.add_argument(
         "--start-process",                               // long name
@@ -18,6 +12,7 @@ fn _main() {
     parser.add_pos_arg("DIRECTORY");
     parser.add_pos_arg("[FILE]...");
     parser.min_pos_args(1);
+    parser.allow_infinite_pos_args();
     parser.run();
     let start_process = match parser.get_val("--start-process") {
         None => "wasn't called".to_string(),

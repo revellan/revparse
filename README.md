@@ -166,3 +166,20 @@ parser.pos_arg_help("Search for PATTERNS in each FILE.
 Example: grep -i 'hello world' menu.h main.c
 PATTERNS can contain multiple patterns separated by newlines.");
 ```
+## Allow an infinite amount of positional arguments
+### Usage
+```rust
+let mut parser = revparse::Parser::new("executable_name");
+// We'll add one positional argument, so the user knows the meaning of all of the positional arguments.
+parser.add_pos_arg("[FILE]...");
+parser.allow_infinite_pos_args();
+parser.run();
+// Then get the positional arguments
+let pos_args: Vec<String> = parser.get_pos_args();
+// do something with them
+for file in pos_args {
+    println!("File given: '{file}'");
+}
+```
+If you don't call the function `allow_infinite_pos_args()`,
+then the amount of positional arguments the user can enter is limited to the amount of times the `add_pos_arg()` function was called

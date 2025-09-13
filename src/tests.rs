@@ -105,3 +105,29 @@ fn wrong_function_to_get_args() {
     parser.run_custom_args(&["n", "--test", "value"]);
     parser.get_noval("--test");
 }
+#[test]
+fn infinite_pos_args() {
+    let mut parser = pos_args();
+    parser.allow_infinite_pos_args();
+    let list: [&'static str; 14] = [
+        "Just the program name, will be skipped using skip(1) anyways",
+        "posarg",
+        "some other damn argument",
+        "yeah this is getting dreadfull like",
+        "I'll still have to write so much",
+        "And",
+        "I feel like my",
+        "arguments",
+        "are a little",
+        "too long",
+        "don't you think so too?",
+        "?",
+        "!?!?!?!?!?",
+        "__asldfkjaö",
+    ];
+    parser.run_custom_args(&list);
+    let pos_args = parser.get_pos_args();
+    for i in 0..pos_args.len() {
+        assert_eq!(pos_args[i], list[i + 1]);
+    }
+}

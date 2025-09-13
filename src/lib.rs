@@ -26,6 +26,7 @@ pub struct Parser<'a> {
     max_pos_args_left: u16,
     pos_arg_help: Option<&'a str>,
     parsed_pos_args: Option<Vec<String>>,
+    infinite_pos_args: bool,
 }
 /// The Parser Struct is the heart of revparse
 /// Here's a brief explanation
@@ -197,7 +198,30 @@ pub struct Parser<'a> {
 /// Example: grep -i 'hello world' menu.h main.c
 /// PATTERNS can contain multiple patterns separated by newlines.");
 /// ```
+/// ## Allow an infinite amount of positional arguments
+/// ### Usage
+/// ```rust
+/// let mut parser = revparse::Parser::new("executable_name");
+/// // We'll add one positional argument, so the user knows the meaning of all of the positional arguments.
+/// parser.add_pos_arg("[FILE]...");
+/// parser.allow_infinite_pos_args();
+/// parser.run();
+/// // Then get the positional arguments
+/// let pos_args: Vec<String> = parser.get_pos_args();
+/// // do something with them
+/// for file in pos_args {
+///     println!("File given: '{file}'");
+/// }
+/// ```
+/// If you don't call the function `allow_infinite_pos_args()`,
+/// then the amount of positional arguments the user can enter is limited to the amount of times the `add_pos_arg()` function was called
 impl<'a> Parser<'a> {
+    fn extra_operand(&self, arg: &str) {
+        eprintln!(
+            "{}: extra operand ‘{}’\n{}: Try '{} --help' for more information.",
+            self.program_name, arg, self.program_name, self.program_name
+        );
+    }
     fn arg_does_not_exist(&self, arg: &str) {
         if arg == "--help" || arg == "-h" {
             self.no_val_allowed(arg);
@@ -374,7 +398,7 @@ impl<'a> Parser<'a> {
                         exit(1);
                     }
                 }
-            } else if e_arg.starts_with("-") {
+            } else if e_arg.starts_with('-') {
                 let mut rest_is_val: Option<String> = None;
                 let mut value: Option<String> = None;
                 'chars: for char in e_arg.chars().skip(1) {
@@ -549,6 +573,7 @@ impl<'a> Parser<'a> {
             max_pos_args_left: 0,
             pos_arg_help: None,
             parsed_pos_args: None,
+            infinite_pos_args: false,
         }
     }
     /// ## Help message for positional arguments
@@ -625,22 +650,32 @@ impl<'a> Parser<'a> {
         ));
     }
     fn internal_add_pos_arg(&mut self, e_arg: String) {
-        if self.pres_pos_args.is_some() {
-            if self.max_pos_args_left <= 0 {
-                self.arg_does_not_exist(&e_arg);
-                exit(1);
-            }
+        if self.infinite_pos_args {
             if self.parsed_pos_args.is_none() {
                 self.parsed_pos_args = Some(Vec::new());
             }
             self.parsed_pos_args.as_mut().unwrap().push(e_arg);
-            self.max_pos_args_left -= 1;
             if self.min_pos_args > 0 {
                 self.min_pos_args -= 1;
             }
         } else {
-            self.arg_does_not_exist(&e_arg);
-            exit(1);
+            if self.pres_pos_args.is_some() {
+                if self.max_pos_args_left <= 0 {
+                    self.extra_operand(&e_arg);
+                    exit(1);
+                }
+                if self.parsed_pos_args.is_none() {
+                    self.parsed_pos_args = Some(Vec::new());
+                }
+                self.parsed_pos_args.as_mut().unwrap().push(e_arg);
+                self.max_pos_args_left -= 1;
+                if self.min_pos_args > 0 {
+                    self.min_pos_args -= 1;
+                }
+            } else {
+                self.arg_does_not_exist(&e_arg);
+                exit(1);
+            }
         }
     }
     /// ### Usage
@@ -671,6 +706,18 @@ impl<'a> Parser<'a> {
             Some(vec) => vec,
             None => Vec::new(),
         }
+    }
+    /// # Allow an infinite amount of positional arguments
+    /// ### Usage
+    /// ```rust
+    /// let mut parser = revparse::Parser::new("executable_name");
+    /// // We'll add one positional argument, so the user knows the meaning of all of the positional arguments.
+    /// parser.add_pos_arg("[FILE]...");
+    /// parser.allow_infinite_pos_args();
+    /// ```
+    /// Now the user can enter as many arguments as he wishes
+    pub fn allow_infinite_pos_args(&mut self) {
+        self.infinite_pos_args = true;
     }
     /// # Simulate the users arguments
     /// ### Usage
