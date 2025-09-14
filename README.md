@@ -121,7 +121,7 @@ Usage: executable_name [OPTION]...
 Options:
   -h, --help                display this help text and exit
 ```
-As you can see, the ARGUMENT after `[OPTION]...` vanished
+As you can see, the `ARGUMENT` after `[OPTION]...` vanished
 
 ### Here's how to force the user to enter at least 1 out of 2 positional arguments
 ```rust
