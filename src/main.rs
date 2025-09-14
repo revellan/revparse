@@ -1,6 +1,6 @@
 use revparse::Parser;
 fn main() {
-    let mut parser = Parser::new("parser");
+    let mut parser = Parser::new("revparse");
     parser.add_argument(
         "--start-process",                               // long name
         Some("-s"),                                      // short name (optional)
@@ -37,6 +37,6 @@ fn main() {
             println!("Positional arg {}: '{}'", c, i);
         }
     } else {
-        println!("No positional arguments given.");
+        panic!("The user is forced to give at least one positional argument. So this can't be the case.");
     }
 }
