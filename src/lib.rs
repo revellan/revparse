@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, mem};
+use std::{collections::HashMap, env};
 #[cfg(test)]
 mod tests;
 const ERROR_1: &'static str = "The 'run' function has to be executed before this Function!!! Consult the Documentation for more... ERROR_CODE: '1'";
@@ -707,8 +707,8 @@ impl<'a> Parser<'a> {
     /// }
     /// ```
     pub fn get_pos_args(&mut self) -> Vec<String> {
-        match mem::replace(&mut self.parsed_pos_args, None) {
-            Some(vec) => vec,
+        match self.parsed_pos_args.take() {
+            Some(s) => s,
             None => Vec::new(),
         }
     }
