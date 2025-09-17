@@ -651,26 +651,31 @@ impl<'a> Parser<'a> {
     }
     fn internal_add_pos_arg(&mut self, e_arg: String) {
         if self.infinite_pos_args {
-            if self.parsed_pos_args.is_none() {
-                self.parsed_pos_args = Some(Vec::new());
-            }
-            self.parsed_pos_args.as_mut().unwrap().push(e_arg);
             if self.min_pos_args > 0 {
                 self.min_pos_args -= 1;
+            }
+            if let Some(mut s) = self.parsed_pos_args.take() {
+                s.push(e_arg);
+                self.parsed_pos_args = Some(s);
+            } else {
+                self.parsed_pos_args = Some(vec![e_arg]);
             }
         } else {
             if self.pres_pos_args.is_some() {
                 if self.max_pos_args_left <= 0 {
                     self.extra_operand(&e_arg);
                     exit(1);
-                }
-                if self.parsed_pos_args.is_none() {
-                    self.parsed_pos_args = Some(Vec::new());
-                }
-                self.parsed_pos_args.as_mut().unwrap().push(e_arg);
-                self.max_pos_args_left -= 1;
-                if self.min_pos_args > 0 {
-                    self.min_pos_args -= 1;
+                } else {
+                    self.max_pos_args_left -= 1;
+                    if self.min_pos_args > 0 {
+                        self.min_pos_args -= 1;
+                    }
+                    if let Some(mut s) = self.parsed_pos_args.take() {
+                        s.push(e_arg);
+                        self.parsed_pos_args = Some(s);
+                    } else {
+                        self.parsed_pos_args = Some(vec![e_arg]);
+                    }
                 }
             } else {
                 self.arg_does_not_exist(&e_arg);
