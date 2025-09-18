@@ -259,27 +259,25 @@ impl<'a> Parser<'a> {
         let help = self.help.as_mut().unwrap();
         help.push_str("  -h, --help                display this help text and exit\n");
         for (i, s) in &self.args {
-            let mut length: i8; //28 chars between help_msg and the beginning of the line
+            let mut length: i16; //28 chars between help_msg and the beginning of the line
             match s.short_name {
                 Some(sn) => {
                     help.push_str(format!("  {}, {}", sn, i).as_str());
-                    length = 22 - i.len() as i8;
+                    length = 22 - i.len() as i16;
                 }
                 None => {
                     help.push_str(format!("  {}", i).as_str());
-                    length = 26 - i.len() as i8;
+                    length = 26 - i.len() as i16;
                 }
             }
             if s.take_value.is_some() {
-                length -= s.take_value.as_ref().unwrap().len() as i8 + 1;
+                length -= s.take_value.as_ref().unwrap().len() as i16 + 1;
                 help.push_str(format!("={}", s.take_value.unwrap().to_uppercase()).as_str());
             }
             if length <= 2 {
                 help.push_str("  ");
             } else {
-                for _ in 0..length {
-                    help.push(' ');
-                }
+                help.push_str(&" ".repeat(length as usize));
             }
             help.push_str(s.help_msg);
             help.push('\n');
