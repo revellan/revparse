@@ -13,7 +13,7 @@ grep --file=FILE    // takes a value
 ```
 ### In this example we will add an argument of the first type, that takes no value
 ```rust
-let mut parser = revparse::Parser::new("grep");
+# let mut parser = revparse::Parser::new("grep");
 parser.add_argument(
     "--version",
     Some("-V"),     // Short name (optional)
@@ -27,7 +27,7 @@ parser.add_argument(
 ```
 ### In this example we will add an argument of the second type, that takes a value
 ```rust
-let mut parser = revparse::Parser::new("grep");
+# let mut parser = revparse::Parser::new("grep");
 parser.add_argument(
     "--file",
     Some("-f"),     // Short name (optional)
@@ -39,25 +39,31 @@ parser.add_argument(
 ```txt
   -f, --file=FILE           take PATTERNS from FILE
 ```
+### Before getting ANY argument at all, you have to call
+```rust
+# let mut parser = revparse::Parser::new("grep");
+parser.run();
+```
+ ONCE in the entire program, not for every argument!
 ### Find out if the user gave us an Option of the first type (That takes no value), or not
 ### (Using the 'get_noval' function)
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--version", Some("-V"), "display version information and exit", None);
-parser.run();   // Will parse the arguments the user entered
+# let mut parser = revparse::Parser::new("grep");
+# parser.add_argument("--version", Some("-V"), "display version information and exit", None);
+# parser.run();   // Will parse the arguments the user entered
 let version: bool = parser.get_noval("--version");
-assert_eq!(version, false); // Since this is a doc-test, the flag will not have been given
+# assert_eq!(version, false); // Since this is a doc-test, the flag will not have been given
 ```
 ### Get the value the user entered for the second type (That takes a value)
 ### (Using the 'get_val' function)
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--file", Some("-f"), "take PATTERNS from FILE", Some("FILE"));
-parser.run();
+# let mut parser = revparse::Parser::new("grep");
+# parser.add_argument("--file", Some("-f"), "take PATTERNS from FILE", Some("FILE"));
+# parser.run();   // only run this once, not for every argument
 let file: Option<String> = parser.get_val("--file"); // DIFFERENT FUNCTION THAN ABOVE !!!
 
 // The 'file' variable will be None, if the user didn't enter this flag, and Some(String) if he did
-assert_eq!(file, None); // Since this is a doc-test, the flag will not have been given
+# assert_eq!(file, None); // Since this is a doc-test, the flag will not have been given
 ```
 ### Examples
 Since we want to simulate the user giving us flags (often called Options), we will use the run_custom_args() function instead of run()
@@ -103,7 +109,7 @@ program --value=some_value
 ```
 ### Usage
 ```rust
-let mut parser = revparse::Parser::new("executable_name");
+# let mut parser = revparse::Parser::new("executable_name");
 parser.add_pos_arg("ARGUMENT");
 ```
 #### Help message
@@ -125,7 +131,7 @@ As you can see, the `ARGUMENT` after `[OPTION]...` vanished
 
 ### Here's how to force the user to enter at least 1 out of 2 positional arguments
 ```rust
-let mut parser = revparse::Parser::new("executable_name");
+# let mut parser = revparse::Parser::new("executable_name");
 parser.add_pos_arg("ARGUMENT1");    // This argument will be forced
 parser.add_pos_arg("[ARGUMENT2]");  // This argument won't be forced
 // Since we want the user to enter the first one, but don't care
@@ -136,7 +142,7 @@ parser.min_pos_args(1);
 ### Getting the value of positional arguments
 ```rust
 // Example from above
-let mut parser = revparse::Parser::new("executable_name");
+# let mut parser = revparse::Parser::new("executable_name");
 parser.add_pos_arg("ARGUMENT1");
 parser.add_pos_arg("[ARGUMENT2]");
 parser.min_pos_args(1);
@@ -158,10 +164,10 @@ PATTERNS can contain multiple patterns separated by newlines.
 ```
 To implement the above help message with this library you can use the 'pos_arg_help' function:
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_pos_arg("PATTERNS");
-parser.add_pos_arg("[FILE]...");
-parser.min_pos_args(1);         // Force the user to enter a PATTERN
+# let mut parser = revparse::Parser::new("grep");
+# parser.add_pos_arg("PATTERNS");
+# parser.add_pos_arg("[FILE]...");
+# parser.min_pos_args(1);         // Force the user to enter a PATTERN
 parser.pos_arg_help("Search for PATTERNS in each FILE.
 Example: grep -i 'hello world' menu.h main.c
 PATTERNS can contain multiple patterns separated by newlines.");
@@ -169,7 +175,7 @@ PATTERNS can contain multiple patterns separated by newlines.");
 ## Allow an infinite amount of positional arguments
 ### Usage
 ```rust
-let mut parser = revparse::Parser::new("executable_name");
+# let mut parser = revparse::Parser::new("executable_name");
 // We'll add one positional argument, so the user knows the meaning of all of the positional arguments.
 parser.add_pos_arg("[FILE]...");
 parser.allow_infinite_pos_args();
