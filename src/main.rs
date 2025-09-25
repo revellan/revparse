@@ -7,7 +7,7 @@ revparse! {
     [PosMax => 10];
 }
 fn main() {
-    let mut rvp = module::Revparse::new(std::env::args());
+    let mut rvp = module::Revparse::new();
     let pos_args = rvp.get_pos_args();
     for i in pos_args.iter().enumerate() {
         println!("Pos_arg {}: '{}'", i.0, i.1);

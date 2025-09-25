@@ -29,9 +29,9 @@ dependencies = [
 
 [[package]]
 name = "revparse_derive"
-version = "0.1.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a42038ce352c0ff3f782f55d8366eab866ec63535b9382d511a644a53619fdb7"
+checksum = "2bb12e9d1d7e5b91a6a069fce7144d119b770611736810116b20feef2144d9f8"
 dependencies = [
  "proc-macro2",
  "quote",
