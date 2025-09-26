@@ -192,7 +192,9 @@ To change it to `revparse` for example:
 
 ### Pos
 Setting can be given multiple times.
-Each `Pos` setting will be displayed in the "Usage message", so this:
+Each `Pos` setting will be displayed in the "Usage message".
+
+This:
 ```rust
 [Pos => "SOME"];
 [Pos => "ANOTHER"];
