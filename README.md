@@ -77,7 +77,7 @@ revparse! {
 }
 fn main() {
     let args = revmod::Revparse::new(); 
-    println("{:#?}", args);
+    println!("{:#?}", args);
 }
 ```
 This would print (if the user entered no arguments):
