@@ -141,6 +141,19 @@ There are six [settings](#settings) for positional arguments.
 5. [InfinitePos](#infinitepos)
 6. [ModName](#modname)
 
+To get the positional arguments, the user entered you can use the `get_pos_args()` function.
+```rust
+revparse! {
+    [PosMax => 5];
+    [PosMin => 1];
+}
+fn main() {
+    let mut args = revmod::Revparse::new();
+    let pos_args = args.get_pos_args();
+    let len = pos_args.len();
+    assert!(len <= 5 && len >= 1); // User has to enter beween 1 and 5 positional arguments.
+}
+```
 
 ### Implementing this for GNU grep
 ```txt
