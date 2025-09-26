@@ -203,7 +203,7 @@ would be displayed like this:
 ```txt
 Usage: program_name [OPTION]... SOME ANOTHER
 ```
-[Positional arguments](#positional-arguments)
+[More](#positional-arguments)
 
 ### PosHelp
 Help message for positional arguments.
