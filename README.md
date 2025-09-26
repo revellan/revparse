@@ -133,7 +133,7 @@ The following Settings exist:
 
 \[[Pos](#pos) => \<string literal\>\];
 
-\[[PosHelp](#poshelp) => <string literal>\];
+\[[PosHelp](#poshelp) => \<string literal\>\];
 
 \[[MinPos](#min) => u64\];
 
@@ -141,7 +141,7 @@ The following Settings exist:
 
 \[[InfinitePos](#infinitepos) => bool\];
 
-\[[ModName](#modname) => <identifier>\];
+\[[ModName](#modname) => \<identifier\>\];
 
 ### ExecName
 The name of the executable. Needed for the help message.
