@@ -128,12 +128,19 @@ The Settings syntax is as follows
 [SettingName => ...];
 ```
 The following Settings exist:
+
 \[[ExecName](#execname) => "executable_name"\];
+
 \[[Pos](#pos) => <string literal>\];
+
 \[[PosHelp](#poshelp) => <string literal>\];
+
 \[[MinPos](#min) => u64\];
+
 \[[MaxPos](#maxpos) => u64\];
+
 \[[InfinitePos](#infinitepos) => bool\];
+
 \[[ModName](#modname) => <identifier>\];
 
 ### ExecName
