@@ -180,7 +180,7 @@ To implement that, you would have to use these settings:
 [Pos => "[FILE]..."];
 [ExecName => "grep"];
 [InfinitePos => true]; // grep has no limit for the amount of files you can enter.
-[MinPos => 1]; // but forces you to enter a Pattern
+[MinPos => 1]; // and forces you to enter a Pattern
 ```
 
 ### MinPos
