@@ -123,6 +123,42 @@ fn main() {
 }
 ```
 ## Positional Arguments
+
+Positional arguments are arguments that do not start with a "-" or "--".
+
+If the user wants to give a positional argument, that does in fact start with a "-", he can write a "--" before the positional argument like this:
+```bash
+program_name -- "----positional argument"
+```
+
+If you don't know what positional arguments are, read [this](https://betterdev.blog/command-line-arguments-anatomy-explained/).
+
+There are six [settings](#settings) for positional arguments.
+1. [Pos](#pos)
+2. [PosHelp](#poshelp)
+3. [MinPos](#minpos)
+4. [MaxPos](#maxpos)
+5. [InfinitePos](#infinitepos)
+6. [ModName](#modname)
+
+
+### Implementing this for GNU grep
+```txt
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Search for PATTERNS in each FILE.
+Example: grep -i 'hello world' menu.h main.c
+PATTERNS can contain multiple patterns separated by newlines.
+```
+To implement this, you would have to use these settings:
+```rust
+[PosHelp => "Search for PATTERNS in each FILE.\nExample: grep -i 'hello world' menu.h main.c\nPATTERNS can contain multiple patterns separated by newlines."];
+[Pos => "PATTERNS"];
+[Pos => "[FILE]..."];
+[ExecName => "grep"];
+[InfinitePos => true]; // grep has no limit for the amount of files you can enter.
+[MinPos => 1]; // and forces you to enter a Pattern
+```
+
 ## Settings
 The Settings syntax is as follows
 ```rust
@@ -166,22 +202,7 @@ POS HELP MESSAGE
 Options:
 ...
 ```
-In case you wonder for what this is, here is the PosHelp message of GNU grep:
-```txt
-Usage: grep [OPTION]... PATTERNS [FILE]...
-Search for PATTERNS in each FILE.
-Example: grep -i 'hello world' menu.h main.c
-PATTERNS can contain multiple patterns separated by newlines.
-```
-To implement that, you would have to use these settings:
-```rust
-[PosHelp => "Search for PATTERNS in each FILE.\nExample: grep -i 'hello world' menu.h main.c\nPATTERNS can contain multiple patterns separated by newlines."];
-[Pos => "PATTERNS"];
-[Pos => "[FILE]..."];
-[ExecName => "grep"];
-[InfinitePos => true]; // grep has no limit for the amount of files you can enter.
-[MinPos => 1]; // and forces you to enter a Pattern
-```
+In case you wonder for what this is, [here is an example](#implementing-this-for-gnu-grep).
 
 ### MinPos
 The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
