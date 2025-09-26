@@ -191,7 +191,16 @@ To change it to `revparse` for example:
 ```
 
 ### Pos
-Setting can be given multiple times
+Setting can be given multiple times.
+Each `Pos` setting will be displayed in the "Usage message", so this:
+```rust
+[Pos => "SOME"];
+[Pos => "ANOTHER"];
+```
+would be displayed like this:
+```txt
+Usage: program_name [OPTION]... SOME ANOTHER
+```
 [Positional arguments](#positional-arguments)
 
 ### PosHelp
