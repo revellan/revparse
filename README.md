@@ -166,7 +166,7 @@ The Settings syntax is as follows
 ```
 The following Settings exist:
 
-\[[ExecName](#execname) => "executable_name"\];
+\[[ExecName](#execname) => \<string literal\>\];
 
 \[[Pos](#pos) => \<string literal\>\];
 
