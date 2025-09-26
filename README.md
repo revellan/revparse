@@ -1,172 +1,205 @@
 # revparse
+Compile time errors, fast parsing, easy usage.
+
 ## Usage
-First you have to create a mutable variable, we'll call it parser
-```rust
-let mut parser = revparse::Parser::new("executable_name"); // for grep "executable_name" would be "grep"
-```
-There are two types of arguments the user can give
+This argument parser works using the revparse! macro, into which you will write all the options:
 
-One that takes a value, and one that doesn't:
-```txt
-grep --version      // takes no value
-grep --file=FILE    // takes a value
-```
-### In this example we will add an argument of the first type, that takes no value
+`...` is obviously just a placeholder.
 ```rust
-parser.add_argument(
-    "--version",
-    Some("-V"),     // Short name (optional)
-    "display version information and exit", // help message
-    None,           // Take no value
-);
+use revparse::revparse;
+revparse! {
+    [...];
+    [...];
+    [...];
+}
 ```
-#### How the argument will be shown in the help message:
-```txt
-  -V, --version             display version information and exit
-```
-### In this example we will add an argument of the second type, that takes a value
-```rust
-parser.add_argument(
-    "--file",
-    Some("-f"),     // Short name (optional)
-    "take PATTERNS from FILE",  // help message
-    Some("FILE"),   // Take a value called FILE to help the user understand what it is for
-);
-```
-#### How the argument will be shown in the help message:
-```txt
-  -f, --file=FILE           take PATTERNS from FILE
-```
-### Before getting ANY argument at all, you have to call
-```rust
-parser.run();
-```
- ONCE in the entire program, not for every argument!
-### Find out if the user gave us an Option of the first type (That takes no value), or not
-### (Using the 'get_noval' function)
-```rust
-let version: bool = parser.get_noval("--version");
-```
-### Get the value the user entered for the second type (That takes a value)
-### (Using the 'get_val' function)
-```rust
-let file: Option<String> = parser.get_val("--file"); // DIFFERENT FUNCTION THAN ABOVE !!!
+`revparse! {...}` should be written outside of any functions, as it creates a module called `revmod` by default.
+You can change the name using the [Settings syntax](#settings).
 
-// The 'file' variable will be None, if the user didn't enter this flag, and Some(String) if he did
-```
-### Examples
-Since we want to simulate the user giving us flags (often called Options), we will use the run_custom_args() function instead of run()
+## There's four different types of non positional arguments you can add:
+
+### 1. long (--some-arg), short (-s), help message
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--test", Some("-t"), "this is a test flag, that takes a value", Some("TEST_VALUE"));
-parser.run_custom_args(&["program_name", "-t", "some_value"]); // --test will work just the same
-let test: Option<String> = parser.get_val("--test");
-assert_eq!(test.unwrap(), "some_value");
+[some_arg, 's', "help message"];
 ```
+### 2. long (--no-short), help message
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--test", Some("-t"), "this is a test flag, that takes a value", Some("TEST_VALUE"));
-// This time the user doesn't give us an argument
-parser.run_custom_args(&["program_name"]);
-let test: Option<String> = parser.get_val("--test");
-assert_eq!(test, None);     // Which is why the 'test' variable is None, and not Some(String)
+[no_short, "help message"];
 ```
+### 3. long (--value=VALUE), short (-v VALUE / -vVALUE), help message, VALUE
+`VALUE` is for making the user understand what value you want him to enter.
+for example `FILE` would mean, the user should enter a filename.
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--test", Some("-t"), "this is a test flag, that takes no value", None);
-parser.run_custom_args(&["program_name", "-t"]);    // again, --test will work the same
-let test: bool = parser.get_noval("--test");        // you can't use "-t" for this function
-assert_eq!(test, true);
+[value, 'v', "help message", "VALUE"];
 ```
+### 4. long (--takes-val-no-short=SOME), help message, SOME
 ```rust
-let mut parser = revparse::Parser::new("grep");
-parser.add_argument("--test", Some("-t"), "this is a test flag, that takes no value", None);
-parser.run_custom_args(&["program_name"]);      // this time the user gave us no arguments
-let test: bool = parser.get_noval("--test");     
-assert_eq!(test, false);                        // which is why the 'test' variable is false
+[takes_val_no_short, "help message", "SOME"];
+```
+
+### All the above options together:
+```rust
+revparse! {
+    [some_arg, 's', "help message"];
+    [no_short, "help message"];
+    [value, 'v', "help message", "VALUE"];
+    [takes_val_no_short, "help message", "SOME"];
+}
+```
+### How the help message would look like as of now:
+```txt
+Usage: program_name [OPTION]...
+
+Options:
+  -h, --help                display this help text and exit
+  -s, --some-arg            help message
+  --no-short                help message
+  -v, --value=VALUE         help message
+  --takes-val-no-short=SOME  help message
+```
+Of course "help message" isn't a very useful help message
+
+As you can see in the help message, it says `program_name`, which probably isn't what you want.
+
+You can change it using the [Settings syntax](#settings).
+
+## Accessing the values
+
+`new()` parses environmental args.
+for tests you can use `custom_new()`, more about it [here](#custom-args-for-testing)
+```rust
+// creates module revmod
+revparse! {
+    [some_arg, 's', "help message"];
+    [no_short, "help message"];
+    [value, 'v', "help message", "VALUE"];
+    [takes_val_no_short, "help message", "SOME"];
+}
+fn main() {
+    let args = revmod::Revparse::new(); 
+    println("{:#?}", args);
+}
+```
+This would print (if the user entered no arguments):
+```rust
+Revparse {
+    some_arg: false,
+    no_short: false,
+    value: None,
+    takes_val_no_short: None,
+}
+```
+The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.
+
+## Custom args for testing
+You can use the `custom_new()` function for testing your program with preset arguments.
+`custom_new()` takes `impl Iterator<Item = String>` as a parameter.
+### So let's test the example above:
+```rust
+revparse! {
+    [some_arg, 's', "help message"];
+    [no_short, "help message"];
+    [value, 'v', "help message", "VALUE"];
+    [takes_val_no_short, "help message", "SOME"];
+}
+// helper function
+fn iter_str(args: &[&str]) -> impl Iterator<Item = String> {
+    args.iter().map(|i| i.to_string())
+}
+fn main() {
+    let args = revmod::Revparse::custom_new(iter_str(&["exec", "--some-arg", "-vEXAMPLE_VALUE", "--takes-val-no-short", "some_value"]));
+    assert_eq!(args.some_arg, true);    // was called
+    assert_eq!(args.no_short, false);   // wasn't called
+    assert_eq!(args.value.unwrap(), "EXAMPLE_VALUE"); // If -v had not been called, args.value would be `None` and the program would panic.
+    assert_eq!(args.takes_val_no_short.unwrap(), "some_value");
+    
+    // So let's test it with different args
+    let args = revmod::Revparse::custom_new(iter_str(&["exec", "-s", "--value=VAL", "--no-short"]));
+    assert_eq!(args.some_arg, true); // was called with "-s"
+    assert_eq!(args.no_short, true);
+    assert_eq!(args.value.unwrap(), "VAL");
+    assert_eq!(args.takes_val_no_short, None);  // is None, since it wasn't called
+}
 ```
 ## Positional Arguments
-revparse supports the use of positional arguments, which are values passed without flags.
-
-Like this:
-```txt
-program some_value
-```
-Instead of
-```txt
-program --value=some_value
-```
-### Usage
+## Settings
+The Settings syntax is as follows
 ```rust
-parser.add_pos_arg("ARGUMENT");
+[SettingName => ...];
 ```
-#### Help message
-##### With a positional argument:
+The following Settings exist:
+\[[ExecName](#execname) => "executable_name"\];
+\[[Pos](#pos) => <string literal>\];
+\[[PosHelp](#poshelp) => <string literal>\];
+\[[MinPos](#min) => u64\];
+\[[MaxPos](#maxpos) => u64\];
+\[[InfinitePos](#infinitepos) => bool\];
+\[[ModName](#modname) => <identifier>\];
+
+### ExecName
+The name of the executable. Needed for the help message.
+Default: `program_name`
+
+### Pos
+Setting can be given multiple times
+[Positional arguments](#positional-arguments)
+
+### PosHelp
+Help message for positional arguments.
+For example
+```rust
+[PosHelp => "POS HELP MESSAGE"];
+```
+would be shown in the help message as:
 ```txt
-Usage: executable_name [OPTION]... ARGUMENT
+Usage: program_name [OPTION]...
+POS HELP MESSAGE
 
 Options:
-  -h, --help                display this help text and exit
+...
 ```
-##### Without a positional argument:
-```txt
-Usage: executable_name [OPTION]...
-
-Options:
-  -h, --help                display this help text and exit
-```
-As you can see, the `ARGUMENT` after `[OPTION]...` vanished
-
-### Here's how to force the user to enter at least 1 out of 2 positional arguments
-```rust
-parser.add_pos_arg("ARGUMENT1");    // This argument will be forced
-parser.add_pos_arg("[ARGUMENT2]");  // This argument won't be forced
-// Since we want the user to enter the first one, but don't care
-// about whether he enters a second positional argument, we will pass 1 to this function
-parser.min_pos_args(1);
-// If you were to give 2 to that function, the user would have to enter 2 positional arguments
-```
-### Getting the value of positional arguments
-```rust
-// Example from above
-parser.add_pos_arg("ARGUMENT1");
-parser.add_pos_arg("[ARGUMENT2]");
-parser.min_pos_args(1);
-parser.run_custom_args(&["executable_name", "first_positional_argument", "--", "---second positional argument"]);
-// The second positional argument starts with --- to demonstrate, that the user will have to type -- before such an argument
-let pos_args: Vec<String> = parser.get_pos_args();
-// parser.get_pos_args() returns a Vector with ALL positional arguments given
-assert_eq!(pos_args.len(), 2); // The user entered both positional arguments, so the length is 2
-assert_eq!(pos_args[0], "first_positional_argument");
-assert_eq!(pos_args[1], "---second positional argument");
-```
-## Help message for positional arguments
-Sometimes positional arguments need an explanation, like with grep:
+In case you wonder for what this is, here is the PosHelp message of GNU grep:
 ```txt
 Usage: grep [OPTION]... PATTERNS [FILE]...
 Search for PATTERNS in each FILE.
 Example: grep -i 'hello world' menu.h main.c
 PATTERNS can contain multiple patterns separated by newlines.
 ```
-To implement the above help message with this library you can use the 'pos_arg_help' function:
+To implement that, you would have to use these settings:
 ```rust
-parser.pos_arg_help("Search for PATTERNS in each FILE.
-Example: grep -i 'hello world' menu.h main.c
-PATTERNS can contain multiple patterns separated by newlines.");
+[PosHelp => "Search for PATTERNS in each FILE.\nExample: grep -i 'hello world' menu.h main.c\nPATTERNS can contain multiple patterns separated by newlines."];
+[Pos => "PATTERNS"];
+[Pos => "[FILE]..."];
+[ExecName => "grep"];
+[InfinitePos => true]; // grep has no limit for the amount of files you can enter.
+[MinPos => 1]; // but forces you to enter a Pattern
 ```
-## Allow an infinite amount of positional arguments
-### Usage
+
+### MinPos
+The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
+Default is 0.
+
+### MaxPos
+The maximum amount of [Positional arguments](#positional-arguments) the user has to enter.
+Default is the amount of times
 ```rust
-// We'll add one positional argument, so the user knows the meaning of all of the positional arguments.
-parser.add_pos_arg("[FILE]...");
-parser.allow_infinite_pos_args();
-parser.run();
-// Then get the positional arguments
-let pos_args: Vec<String> = parser.get_pos_args();
-// do something with them
-for file in pos_args {
-    println!("File given: '{file}'");
-}
+[Pos => "SOME"];
 ```
-If you don't call the function `allow_infinite_pos_args()`,
-then the amount of positional arguments the user can enter is limited to the amount of times the `add_pos_arg()` function was called
+was used.
+This default can be overwritten with either [\[MaxPos => ...\];](#maxpos) or [\[InfinitePos => ...\];](#infinitepos).
+
+### InfinitePos
+If this is set to `true`,
+```rust
+[InfinitePos => true];
+```
+there will be no limit, on how much [Positional arguments](#positional-arguments) the user can enter.
+
+### ModName
+Name of the module created by the `revparse!` macro.
+Default is `revmod`.
+If you want to change it to `example`:
+```rust
+[ModName => example];
+```
+`example` can't be a [keyword](https://doc.rust-lang.org/reference/keywords.html#keywords) and should not be written in quotes.
