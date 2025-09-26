@@ -131,7 +131,7 @@ The following Settings exist:
 
 \[[ExecName](#execname) => "executable_name"\];
 
-\[[Pos](#pos) => <string literal>\];
+\[[Pos](#pos) => \<string literal\>\];
 
 \[[PosHelp](#poshelp) => <string literal>\];
 
