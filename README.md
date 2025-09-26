@@ -182,7 +182,13 @@ The following Settings exist:
 
 ### ExecName
 The name of the executable. Needed for the help message.
+
 Default: `program_name`
+
+To change it to `revparse` for example:
+```rust
+[ExecName => "revparse"];
+```
 
 ### Pos
 Setting can be given multiple times
