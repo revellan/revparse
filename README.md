@@ -14,7 +14,7 @@ revparse! {
 }
 ```
 `revparse! {...}` should be written outside of any functions, as it creates a module called `revmod` by default.
-You can change the name of the module using the [Settings syntax](#settings).
+You can change the name of the module using the [ModName](#modname) [setting](#settings).
 
 ## There's four different types of non positional arguments you can add:
 
@@ -28,7 +28,7 @@ You can change the name of the module using the [Settings syntax](#settings).
 ```
 ### 3. long (--value=VALUE), short (-v VALUE / -vVALUE), help message, VALUE
 `VALUE` is for making the user understand what value you want him to enter.
-for example `FILE` would mean, the user should enter a filename.
+For example `FILE` would mean, the user should enter a filename.
 ```rust
 [value, 'v', "help message", "VALUE"];
 ```
@@ -61,7 +61,7 @@ Of course "help message" isn't a very useful help message
 
 As you can see in the help message, it says `program_name`, which probably isn't what you want.
 
-You can change it using the [Settings syntax](#settings).
+You can change it using the [ExecName](#execname) [setting](#settings).
 
 ## Accessing the values
 
@@ -94,7 +94,8 @@ The Arguments that take a value have the type `Option<String>`, those that don't
 ## Custom args for testing
 You can use the `custom_new()` function for testing your program with preset arguments.
 `custom_new()` takes `impl Iterator<Item = String>` as a parameter.
-### So let's test the example above:
+
+So let's test the example above:
 ```rust
 revparse! {
     [some_arg, 's', "help message"];
