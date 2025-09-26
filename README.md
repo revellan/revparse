@@ -4,7 +4,7 @@ Compile time errors, fast parsing, easy usage.
 ## Usage
 This argument parser works using the revparse! macro, into which you will write all the options:
 
-`...` is obviously just a placeholder.
+`...` is just a placeholder.
 ```rust
 use revparse::revparse;
 revparse! {
@@ -14,7 +14,7 @@ revparse! {
 }
 ```
 `revparse! {...}` should be written outside of any functions, as it creates a module called `revmod` by default.
-You can change the name using the [Settings syntax](#settings).
+You can change the name of the module using the [Settings syntax](#settings).
 
 ## There's four different types of non positional arguments you can add:
 
