@@ -185,10 +185,12 @@ To implement that, you would have to use these settings:
 
 ### MinPos
 The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
-Default is 0.
+
+Default is `0`.
 
 ### MaxPos
 The maximum amount of [Positional arguments](#positional-arguments) the user has to enter.
+
 Default is the amount of times
 ```rust
 [Pos => "SOME"];
