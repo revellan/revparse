@@ -65,8 +65,8 @@ You can change it using the [ExecName](#execname) [setting](#settings).
 
 ## Accessing the values
 
-`new()` parses environmental args.
-for tests you can use `custom_new()`, more about it [here](#custom-args-for-testing)
+`new()` parses environmental args,
+for tests you can use `custom_new()`, more about it [here](#custom-args-for-testing).
 ```rust
 // creates module revmod
 revparse! {
@@ -89,7 +89,7 @@ Revparse {
     takes_val_no_short: None,
 }
 ```
-The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.
+==The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.==
 
 ## Custom args for testing
 You can use the `custom_new()` function for testing your program with preset arguments.
