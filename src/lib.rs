@@ -1,4 +1,4 @@
-/// ## Usage
+/// # Usage
 /// This argument parser works using the revparse! macro, into which you will write all the options:
 /// 
 /// `...` is just a placeholder.
@@ -93,13 +93,13 @@
 /// }
 /// ```
 /// <mark>The Arguments that take a value have the type:</mark>
-/// ```rust
+/// ```no_compile
 /// Option<String>
 /// ```
 /// If the flag was not given, the value will be `None`.
 /// 
 /// <mark>Those that don't take a value have the type:</mark>
-/// ```rust
+/// ```no_compile
 /// bool
 /// ```
 /// If the flag was not given, the value will be `false`, if it was, it will be `true`.
@@ -138,7 +138,7 @@
 /// ```
 /// ## Positional Arguments
 /// 
-/// Positional arguments are arguments that do not start with a "-" or "--".
+/// positional arguments are arguments that do not start with a "-" or "--".
 /// 
 /// If the user wants to give a positional argument, that does in fact start with a "-", he can write a "--" before the positional argument like this:
 /// ```bash
@@ -150,13 +150,15 @@
 /// There are six [settings](#settings) for positional arguments.
 /// 1. [Pos](#pos)
 /// 2. [PosHelp](#poshelp)
-/// 3. [MinPos](#minpos)
-/// 4. [MaxPos](#maxpos)
-/// 5. [InfinitePos](#infinitepos)
+/// 3. [PosMin](#posmin)
+/// 4. [PosMax](#posmax)
+/// 5. [PosInfinite](#posinfinite)
 /// 6. [ModName](#modname)
 /// 
+/// ### Get Positional Arguments
 /// To get the positional arguments, the user entered you can use the `get_pos_args()` function.
-/// ```no_compile
+/// ```no_run
+/// # use revparse_derive::revparse;
 /// revparse! {
 ///     [PosMax => 5];
 ///     [PosMin => 1];
@@ -182,8 +184,8 @@
 /// [Pos => "PATTERNS"];
 /// [Pos => "[FILE]..."];
 /// [ExecName => "grep"];
-/// [InfinitePos => true]; // grep has no limit for the amount of files you can enter.
-/// [MinPos => 1]; // and forces you to enter a Pattern
+/// [PosInfinite => true]; // grep has no limit for the amount of files you can enter.
+/// [PosMin => 1]; // and forces you to enter a Pattern
 /// ```
 /// 
 /// ## Settings
@@ -199,11 +201,11 @@
 /// 
 /// \[[PosHelp](#poshelp) => \<string literal\>\];
 /// 
-/// \[[MinPos](#min) => u64\];
+/// \[[PosMin](#posmin) => u64\];
 /// 
-/// \[[MaxPos](#maxpos) => u64\];
+/// \[[PosMax](#posmax) => u64\];
 /// 
-/// \[[InfinitePos](#infinitepos) => bool\];
+/// \[[PosInfinite](#posinfinite) => bool\];
 /// 
 /// \[[ModName](#modname) => \<identifier\>\];
 /// 
@@ -230,6 +232,8 @@
 /// ```txt
 /// Usage: program_name [OPTION]... SOME ANOTHER
 /// ```
+/// and would raise the default of [PosMax](#posmax) to `2`, as [\[Pos => ...\];](#pos) was given twice.
+/// 
 /// [More](#positional-arguments)
 /// 
 /// ### PosHelp
@@ -248,27 +252,39 @@
 /// ```
 /// In case you wonder for what this is, [here is an example](#implementing-this-for-gnu-grep).
 /// 
-/// ### MinPos
-/// The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
+/// ### PosMin
+/// The minimum amount of [positional arguments](#positional-arguments) the user has to enter.
 /// 
 /// Default is `0`.
 /// 
-/// ### MaxPos
-/// The maximum amount of [Positional arguments](#positional-arguments) the user has to enter.
+/// To force the user to enter `1` [positional argument](#positional-arguments):
+/// ```no_compile
+/// [PosMin => 1];
+/// ```
+/// 
+/// ### PosMax
+/// The maximum amount of [positional arguments](#positional-arguments) the user has to enter.
 /// 
 /// Default is the amount of times
 /// ```no_compile
 /// [Pos => "SOME"];
 /// ```
 /// was used.
-/// This default can be overwritten with either [\[MaxPos => ...\];](#maxpos) or [\[InfinitePos => ...\];](#infinitepos).
 /// 
-/// ### InfinitePos
+/// To change it to `5`, which would mean, that the user can't enter more than `5` [positional arguments](#positional-arguments):
+/// ```no_compile
+/// [PosMax => 5];
+/// ```
+/// This default can be overwritten with either [\[PosMax => ...\];](#posmax) or [\[PosInfinite => ...\];](#posinfinite).
+/// 
+/// ### PosInfinite
 /// If this is set to `true`,
 /// ```no_compile
-/// [InfinitePos => true];
+/// [PosInfinite => true];
 /// ```
-/// there will be no limit, on how much [Positional arguments](#positional-arguments) the user can enter.
+/// there will be no limit, on how much [positional arguments](#positional-arguments) the user can enter.
+/// 
+/// Default is `false`.
 /// 
 /// ### ModName
 /// Name of the module created by the `revparse!` macro.

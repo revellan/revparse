@@ -138,7 +138,7 @@ fn main() {
 ```
 ## Positional Arguments
 
-Positional arguments are arguments that do not start with a "-" or "--".
+positional arguments are arguments that do not start with a "-" or "--".
 
 If the user wants to give a positional argument, that does in fact start with a "-", he can write a "--" before the positional argument like this:
 ```bash
@@ -155,6 +155,7 @@ There are six [settings](#settings) for positional arguments.
 5. [PosInfinite](#posinfinite)
 6. [ModName](#modname)
 
+### Get Positional Arguments
 To get the positional arguments, the user entered you can use the `get_pos_args()` function.
 ```rust
 revparse! {
@@ -251,18 +252,28 @@ Options:
 In case you wonder for what this is, [here is an example](#implementing-this-for-gnu-grep).
 
 ### PosMin
-The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
+The minimum amount of [positional arguments](#positional-arguments) the user has to enter.
 
 Default is `0`.
 
+To force the user to enter `1` [positional argument](#positional-arguments):
+```rust
+[PosMin => 1];
+```
+
 ### PosMax
-The maximum amount of [Positional arguments](#positional-arguments) the user has to enter.
+The maximum amount of [positional arguments](#positional-arguments) the user has to enter.
 
 Default is the amount of times
 ```rust
 [Pos => "SOME"];
 ```
 was used.
+
+To change it to `5`, which would mean, that the user can't enter more than `5` [positional arguments](#positional-arguments):
+```rust
+[PosMax => 5];
+```
 This default can be overwritten with either [\[PosMax => ...\];](#posmax) or [\[PosInfinite => ...\];](#posinfinite).
 
 ### PosInfinite
@@ -270,7 +281,9 @@ If this is set to `true`,
 ```rust
 [PosInfinite => true];
 ```
-there will be no limit, on how much [Positional arguments](#positional-arguments) the user can enter.
+there will be no limit, on how much [positional arguments](#positional-arguments) the user can enter.
+
+Default is `false`.
 
 ### ModName
 Name of the module created by the `revparse!` macro.
