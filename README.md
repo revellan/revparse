@@ -104,7 +104,6 @@ If the flag was not given, the value will be `None`.
 bool
 ```
 If the flag was not given, the value will be `false`, if it was, it will be `true`.
-</mark>
 
 ## Custom args for testing
 You can use the `custom_new()` function for testing your program with preset arguments.
