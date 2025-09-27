@@ -76,6 +76,10 @@
 /// }
 /// fn main() {
 ///     let args = revmod::Revparse::new(); 
+///     // args.some_arg => bool
+///     // args.no_short => bool
+///     // args.value => Option<String>
+///     // args.takes_val_no_short => Option<String>
 ///     println!("{:#?}", args);
 /// }
 /// ```
