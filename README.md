@@ -67,7 +67,7 @@ You can change it using the [ExecName setting](#execname).
 
 `new()` parses environmental args,
 for tests you can use `custom_new()`, more about it [here](#custom-args-for-testing).
-<pre><code>
+```rust
 // creates module revmod
 revparse! {
     [some_arg, 's', "help message"];
@@ -76,14 +76,14 @@ revparse! {
     [takes_val_no_short, "help message", "SOME"];
 }
 fn main() {
-    <strong>let args = revmod::Revparse::new();</strong>
+    let args = revmod::Revparse::new(); 
     // args.some_arg => bool
     // args.no_short => bool
-    // args.value => Option\<String\>
-    // args.takes_val_no_short => Option\<String\>
+    // args.value => Option<String>
+    // args.takes_val_no_short => Option<String>
     println!("{:#?}", args);
 }
-</code></pre>
+```
 This would print (if the user entered no arguments):
 ```rust
 Revparse {
@@ -93,7 +93,7 @@ Revparse {
     takes_val_no_short: None,
 }
 ```
-<span style="background-color: red">The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.</span>
+<mark>The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.</mark>
 
 ## Custom args for testing
 You can use the `custom_new()` function for testing your program with preset arguments.
