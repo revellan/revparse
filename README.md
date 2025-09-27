@@ -149,13 +149,12 @@ program_name -- "----positional argument"
 
 If you don't know what positional arguments are, read [this](https://betterdev.blog/command-line-arguments-anatomy-explained/).
 
-There are six [settings](#settings) for positional arguments.
+There are five [settings](#settings) for positional arguments.
 1. [Pos](#pos)
 2. [PosHelp](#poshelp)
 3. [PosMin](#posmin)
 4. [PosMax](#posmax)
 5. [PosInfinite](#posinfinite)
-6. [ModName](#modname)
 
 ### Get Positional Arguments
 To get the positional arguments, the user entered you can use the `get_pos_args()` function.
