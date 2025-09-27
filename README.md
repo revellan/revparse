@@ -89,7 +89,7 @@ Revparse {
     takes_val_no_short: None,
 }
 ```
-==The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.==
+<mark>The Arguments that take a value have the type `Option<String>`, those that don't have the type `bool`.</mark>
 
 ## Custom args for testing
 You can use the `custom_new()` function for testing your program with preset arguments.
