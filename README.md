@@ -14,7 +14,7 @@ revparse! {
 }
 ```
 `revparse! {...}` should be written outside of any functions, as it creates a module called `revmod` by default.
-You can change the name of the module using the [ModName](#modname) [setting](#settings).
+You can change the name of the module using the [ModName setting](#modname).
 
 ## There's four different types of non positional arguments you can add:
 
@@ -57,17 +57,17 @@ Options:
   -v, --value=VALUE         help message
   --takes-val-no-short=SOME  help message
 ```
-Of course "help message" isn't a very useful help message
+Of course "help message" isn't a very useful help message.
 
 As you can see in the help message, it says `program_name`, which probably isn't what you want.
 
-You can change it using the [ExecName](#execname) [setting](#settings).
+You can change it using the [ExecName setting](#execname).
 
 ## Accessing the values
 
 `new()` parses environmental args,
 for tests you can use `custom_new()`, more about it [here](#custom-args-for-testing).
-```rust
+<pre><code>
 // creates module revmod
 revparse! {
     [some_arg, 's', "help message"];
@@ -76,14 +76,14 @@ revparse! {
     [takes_val_no_short, "help message", "SOME"];
 }
 fn main() {
-    let args = revmod::Revparse::new(); 
+    <strong>let args = revmod::Revparse::new();</strong>
     // args.some_arg => bool
     // args.no_short => bool
-    // args.value => Option<String>
-    // args.takes_val_no_short => Option<String>
+    // args.value => Option\<String\>
+    // args.takes_val_no_short => Option\<String\>
     println!("{:#?}", args);
 }
-```
+</code></pre>
 This would print (if the user entered no arguments):
 ```rust
 Revparse {
