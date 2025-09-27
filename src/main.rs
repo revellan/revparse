@@ -6,6 +6,7 @@ revparse! {
     [Pos => "pos_arg"];
     [PosMax => 10];
     [ExecName => "revparse"];
+    [PosInfinite => true];
 }
 revparse! {
     [some_arg, 's', "help message"];

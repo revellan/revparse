@@ -150,9 +150,9 @@ If you don't know what positional arguments are, read [this](https://betterdev.b
 There are six [settings](#settings) for positional arguments.
 1. [Pos](#pos)
 2. [PosHelp](#poshelp)
-3. [MinPos](#minpos)
-4. [MaxPos](#maxpos)
-5. [InfinitePos](#infinitepos)
+3. [PosMin](#posmin)
+4. [PosMax](#posmax)
+5. [PosInfinite](#posinfinite)
 6. [ModName](#modname)
 
 To get the positional arguments, the user entered you can use the `get_pos_args()` function.
@@ -182,8 +182,8 @@ To implement this, you would have to use these settings:
 [Pos => "PATTERNS"];
 [Pos => "[FILE]..."];
 [ExecName => "grep"];
-[InfinitePos => true]; // grep has no limit for the amount of files you can enter.
-[MinPos => 1]; // and forces you to enter a Pattern
+[PosInfinite => true]; // grep has no limit for the amount of files you can enter.
+[PosMin => 1]; // and forces you to enter a Pattern
 ```
 
 ## Settings
@@ -199,11 +199,11 @@ The following Settings exist:
 
 \[[PosHelp](#poshelp) => \<string literal\>\];
 
-\[[MinPos](#min) => u64\];
+\[[PosMin](#posmin) => u64\];
 
-\[[MaxPos](#maxpos) => u64\];
+\[[PosMax](#posmax) => u64\];
 
-\[[InfinitePos](#infinitepos) => bool\];
+\[[PosInfinite](#posinfinite) => bool\];
 
 \[[ModName](#modname) => \<identifier\>\];
 
@@ -230,6 +230,8 @@ would be displayed like this:
 ```txt
 Usage: program_name [OPTION]... SOME ANOTHER
 ```
+and would raise the default of [PosMax](#posmax) to `2`, as [\[Pos => ...\];](#pos) was given twice.
+
 [More](#positional-arguments)
 
 ### PosHelp
@@ -248,12 +250,12 @@ Options:
 ```
 In case you wonder for what this is, [here is an example](#implementing-this-for-gnu-grep).
 
-### MinPos
+### PosMin
 The minimum amount of [Positional arguments](#positional-arguments) the user has to enter.
 
 Default is `0`.
 
-### MaxPos
+### PosMax
 The maximum amount of [Positional arguments](#positional-arguments) the user has to enter.
 
 Default is the amount of times
@@ -261,12 +263,12 @@ Default is the amount of times
 [Pos => "SOME"];
 ```
 was used.
-This default can be overwritten with either [\[MaxPos => ...\];](#maxpos) or [\[InfinitePos => ...\];](#infinitepos).
+This default can be overwritten with either [\[PosMax => ...\];](#posmax) or [\[PosInfinite => ...\];](#posinfinite).
 
-### InfinitePos
+### PosInfinite
 If this is set to `true`,
 ```rust
-[InfinitePos => true];
+[PosInfinite => true];
 ```
 there will be no limit, on how much [Positional arguments](#positional-arguments) the user can enter.
 
