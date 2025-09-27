@@ -98,6 +98,7 @@ Revparse {
 Option<String>
 ```
 If the flag was not given, the value will be `None`.
+
 <mark>Those that don't take a value have the type:</mark>
 ```rust
 bool
