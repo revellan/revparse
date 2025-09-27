@@ -11,4 +11,4 @@ homepage = "https://revparse.revellan.com"
 readme = "README.md"
 
 [dependencies]
-revparse_derive = "1.0.7"
+revparse_derive = { path = "../revparse_derive" }

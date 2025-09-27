@@ -16,6 +16,8 @@ revparse! {
 `revparse! {...}` should be written outside of any functions, as it creates a module called `revmod` by default.
 You can change the name of the module using the [ModName setting](#modname).
 
+If you want a <mark>keyword</mark>, like fn as a flag (--fn), read [this](#how-to-use-a-keyword-as-a-flag).
+
 ## There's four different types of non positional arguments you can add:
 
 ### 1. long (--some-arg), short (-s), help message
@@ -293,3 +295,17 @@ If you want to change it to `example`:
 [ModName => example];
 ```
 `example` can't be a [keyword](https://doc.rust-lang.org/reference/keywords.html#keywords) and should not be written in quotes.
+
+## How to use a keyword as a flag
+To use a [keyword](https://doc.rust-lang.org/reference/keywords.html#keywords) as a flag, use a [raw identifier](https://doc.rust-lang.org/rust-by-example/compatibility/raw_identifiers.html),
+meaning, that you need to add `r#` before the keyword.
+
+Example with match:
+```rust
+[match, 'm', "help message"]; // compiler error
+```
+instead write this:
+```rust
+[r#match, 'm', "help message"]; // compiles
+```
+Don't worry, your flag will NOT be `--r#match`, but will work normally with `--match`.

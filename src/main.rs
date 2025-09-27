@@ -9,7 +9,7 @@ revparse! {
     [PosInfinite => true];
 }
 revparse! {
-    [some_arg, 's', "help message"];
+    [r#fn, 's', "help message"];
     [no_short, "help message"];
     [value, 'v', "help message", "VALUE"];
     [takes_val_no_short, "help message", "SOME"];

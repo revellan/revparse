@@ -118,3 +118,12 @@ fn no_pos_allowed() {
 fn no_pos_allowed2() {
     no_pos::Revparse::custom_new(args(&["n", "pos"]));
 }
+revparse! {
+    [r#fn, 'f', "help message"];
+    [ModName => keyword];
+}
+#[test]
+fn use_keyword_as_flag() {
+    let args = keyword::Revparse::custom_new(args(&["n", "--fn"]));
+    assert_eq!(args.r#fn, true);
+}
