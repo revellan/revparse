@@ -93,13 +93,16 @@
 /// }
 /// ```
 /// <mark>The Arguments that take a value have the type:</mark>
-/// ```no_compile
+/// ```rust
 /// Option<String>
 /// ```
+/// If the flag was not given, the value will be `None`.
+/// 
 /// <mark>Those that don't take a value have the type:</mark>
-/// ```no_compile
+/// ```rust
 /// bool
 /// ```
+/// If the flag was not given, the value will be `false`, if it was, it will be `true`.
 /// </mark>
 /// 
 /// ## Custom args for testing
