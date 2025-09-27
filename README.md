@@ -97,10 +97,12 @@ Revparse {
 ```rust
 Option<String>
 ```
+If the flag was not given, the value will be `None`.
 <mark>Those that don't take a value have the type:</mark>
 ```rust
 bool
 ```
+If the flag was not given, the value will be `false`, if it was, it will be `true`.
 </mark>
 
 ## Custom args for testing
