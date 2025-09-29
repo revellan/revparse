@@ -13,25 +13,25 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.40"
+version = "1.0.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1885c039570dc00dcb4ff087a89e185fd56bae234ddc7f056a945bf36467248d"
+checksum = "ce25767e7b499d1b604768e7cde645d14cc8584231ea6b295e9c9eb22c02e1d1"
 dependencies = [
  "proc-macro2",
 ]
 
 [[package]]
 name = "revparse"
-version = "3.0.3"
+version = "3.0.4"
 dependencies = [
  "revparse_derive",
 ]
 
 [[package]]
 name = "revparse_derive"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6aa0afb6fdabee8ad6bd198a61bc76e54348d7ebff92d57af6fbba10c7220201"
+checksum = "5a35a62ae624df802883ba2eed61eea69721d6ae4c03f7576f9d4dc357d65079"
 dependencies = [
  "proc-macro2",
  "quote",

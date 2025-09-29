@@ -18,23 +18,45 @@ You can change the name of the module using the [ModName setting](#modname).
 
 If you want a <mark>keyword</mark>, like fn as a flag (`--fn`), read [this](#how-to-use-a-keyword-as-a-flag).
 
+### Quickstart
+Here is a quick example, a more thorough explanation is below.
+```rust
+use revparse::revparse;
+revparse! {
+    // arg is of type `bool`
+    [arg, 'a', "help message for --arg / -a"];
+    // underscores are shown as '-'.
+    // with_underscore is also of type `bool`
+    [with_underscore, 'w', "help message for --with-underscore / -w"];
+    // takes_val has the type `Option<String>`
+    [takes_val, 't', "help message for --takes-val=VAL", "VAL"];
+}
+fn main() {
+    let args = revmod::Revparse::new();
+    // In this case the user entered no arguments
+    assert_eq!(args.arg, false);
+    assert_eq!(args.with_underscore, false);
+    assert_eq!(args.takes_val, None);
+}
+```
+
 ## There's four different types of non positional arguments you can add:
 
-### 1. long (--some-arg), short (-s), help message
+### 1. long (`--some-arg`), short (`-s`), help message
 ```rust
 [some_arg, 's', "help message"];
 ```
-### 2. long (--no-short), help message
+### 2. long (`--no-short`), help message
 ```rust
 [no_short, "help message"];
 ```
-### 3. long (--value=VALUE), short (-v VALUE / -vVALUE), help message, VALUE
+### 3. long (`--value=VALUE`), short (`-v VALUE` / `-vVALUE`), help message, VALUE
 `VALUE` is for making the user understand what value you want him to enter.
 For example `FILE` would mean, the user should enter a filename.
 ```rust
 [value, 'v', "help message", "VALUE"];
 ```
-### 4. long (--takes-val-no-short=SOME), help message, SOME
+### 4. long (`--takes-val-no-short=SOME`), help message, SOME
 ```rust
 [takes_val_no_short, "help message", "SOME"];
 ```

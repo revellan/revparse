@@ -8,15 +8,11 @@ revparse! {
     [ExecName => "revparse"];
     [PosInfinite => true];
 }
-revparse! {
-    [r#fn, 's', "help message"];
-    [no_short, "help message"];
-    [value, 'v', "help message", "VALUE"];
-    [takes_val_no_short, "help message", "SOME"];
-    [PosHelp => "POS HELP MESSAGE"];
+#[test]
+fn test_main() {
+    main();
 }
 fn main() {
-    revmod::Revparse::new();
     let mut rvp = module::Revparse::new();
     let pos_args = rvp.get_pos_args();
     for i in pos_args.iter().enumerate() {
